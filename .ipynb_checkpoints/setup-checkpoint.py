@@ -5,7 +5,7 @@ setuptools.setup(
     version="0.4.6-rc1",
     author="mw123",
     description="use in mw",
-    url="https://github.com/mkkb473/mwutils",
+    url="https://github.com/gerard0315/mwutils",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",

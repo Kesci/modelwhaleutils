@@ -151,6 +151,9 @@ class Run():
         self._loggers['system'] = CustomLogger("system", sample_time_interval_seconds=self.flush_interval_seconds,
                                                 metadata=self.metadata, local_path=sys_path, post_addr=self.logs_remote_path,
                                                 buffer_all=self.buffer_all_logs)
+        self._loggers['meta'] = CustomLogger("meta", sample_time_interval_seconds=self.flush_interval_seconds,
+                                                metadata=self.metadata, local_path=sys_path, post_addr=self.logs_remote_path,
+                                                buffer_all=self.buffer_all_logs)
 
     def start_ml(self):
         if self.started:
@@ -163,6 +166,9 @@ class Run():
             clogger.start()
         self.sys_stat = SystemStats(self)
         self.sys_stat.start()
+    
+    def log_meta(self, data):
+        self._loggers['meta'].log(data)
 
     def log_ml(self, step=None, epoch=None, batch=None, loss=None, acc=None, phase="train", custom_logs=None):
         # phase is the same thing with namea
@@ -170,6 +176,12 @@ class Run():
             loss = float(loss)
         if isinstance(acc, np.float32):
             acc = float(acc)
+        if step == None:
+            step = 0
+        if epoch == None:
+            epoch = 0
+        if batch == None:
+            batch = 0
         self._loggers[phase].log(step=step, epoch=epoch,
                                   batch=batch, loss=loss, acc=acc, custom_logs=custom_logs)
 
