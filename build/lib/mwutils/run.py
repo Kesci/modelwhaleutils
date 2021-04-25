@@ -262,7 +262,7 @@ class Run():
             json_struct = {"metadata": self.metadata, "timestamp":tp, "signal": sig, "reason": reason}
             for _ in range(3):
                 r = requests.post(self.abort_remote_path, json=json_struct, headers={"Authorization": jwt.encode(
-                    {"whatever": "1"}, "79eb9467-8348-4b29-a997-7a9685e1a820")})
+                    {"whatever": "1"}, "857851b2-c28c-4d94-83c8-f607b50ccd03")})
                 if r.status_code >= 400:
                     # something wrong
                     jb = ''
@@ -299,7 +299,7 @@ class Run():
             json_struct = {"metadata": self.metadata, "best": [{"phase": name, "val": logger.memoize, _TIMESTAMP: tp} for name, logger in self._loggers.items()]}
             for _ in range(3):
                 r = requests.post(self.conclude_remote_path, json=json_struct, headers={"Authorization": jwt.encode(
-                    {"whatever": "1"}, "79eb9467-8348-4b29-a997-7a9685e1a820")})
+                    {"whatever": "1"}, "857851b2-c28c-4d94-83c8-f607b50ccd03")})
                 if r.status_code >= 400:
                     # something wrong
                     jb = ''
