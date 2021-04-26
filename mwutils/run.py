@@ -176,12 +176,6 @@ class Run():
             loss = float(loss)
         if isinstance(acc, np.float32):
             acc = float(acc)
-        if step == None:
-            step = 0
-        if epoch == None:
-            epoch = 0
-        if batch == None:
-            batch = 0
         self._loggers[phase].log(step=step, epoch=epoch,
                                   batch=batch, loss=loss, acc=acc, custom_logs=custom_logs)
 
