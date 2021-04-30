@@ -50,7 +50,7 @@ class MLLoger(Logger):
             elif self.memoize[_MAX_ACC][_ACC] < val[_ACC]:
                 self.memoize[_MAX_ACC] = val
 
-        if loss:x
+        if loss:
             best = False
             if _MIN_LOSS not in self.memoize and loss:
                 self.memoize[_MIN_LOSS] = val
