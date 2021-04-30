@@ -3,9 +3,6 @@ import os
 
 
 LOGS_VAL = "val_"
-
-def pre_process_logs(logs, phase):
-    
     
 
 class MWCustomCallback(keras.callbacks.Callback):
