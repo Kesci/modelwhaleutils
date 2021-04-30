@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="mwutils",  # Replace with your own username
-    version="0.4.6-rc5",
+    version="0.4.6-rc6",
     author="mw123",
     description="use in mw",
     url="https://github.com/gerard0315/mwutils",

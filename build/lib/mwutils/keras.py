@@ -4,6 +4,9 @@ import os
 
 LOGS_VAL = "val_"
 
+def pre_process_logs(logs, phase):
+    
+    
 
 class MWCustomCallback(keras.callbacks.Callback):
     def set_run(self, run):
@@ -22,9 +25,10 @@ class MWCustomCallback(keras.callbacks.Callback):
         loss = logs.get('loss')
         acc = logs.get('acc')
         acc = acc if acc else logs.get('accuracy')
+        
+        self._log_val_if_exists(epoch, logs=logs)
         self.run.log_ml(epoch=epoch, loss=loss,
                         acc=acc, phase="train", custom_logs=logs)
-        # self._log_val_if_exists(epoch, logs=logs)
 
     def _log_val_if_exists(self, epoch, logs=None):
         loss = logs.get(LOGS_VAL+'loss')

@@ -50,7 +50,7 @@ class MLLoger(Logger):
             elif self.memoize[_MAX_ACC][_ACC] < val[_ACC]:
                 self.memoize[_MAX_ACC] = val
 
-        if loss:
+        if loss:x
             best = False
             if _MIN_LOSS not in self.memoize and loss:
                 self.memoize[_MIN_LOSS] = val
@@ -68,7 +68,7 @@ class MLLoger(Logger):
         if custom_logs:
             if isinstance(custom_logs, dict):
                 for k, v in custom_logs.items():
-                    if k not in ['loss', 'acc', 'accuracy']:
+                    if k not in ['loss', 'acc', 'accuracy', 'val_loss', 'val_acc', 'val_accuracy']:
                         if 'custom_keys' not in self.metadata['annotations']:
                             self.metadata['annotations']['custom_keys'] = []
                         if k not in self.metadata['annotations']['custom_keys']:
