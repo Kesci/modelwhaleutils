@@ -1,11 +1,11 @@
 import setuptools
 
 setuptools.setup(
-    name="mwutils",
-    version="0.4.7-post1",
-    author="mw123",
+    name="modelwhaleutils",
+    version="0.4.7",
+    author="modalwhale team",
     description="use in mw",
-    url="https://github.com/gerard0315/mwutils",
+    url="https://github.com/Kesci/modelwhaleutils",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
