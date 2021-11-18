@@ -8,8 +8,10 @@ import jwt
 import time
 import traceback
 import signal
+import json
 import numpy as np
 from os import path, getpid
+from random import randrange
 
 _STEP = 'step'
 _EPOCH = 'epoch'
@@ -28,6 +30,7 @@ MODEL_TYPE_TORCH = "torch"
 MODEL_TYPE_CUSTOM = "custom"
 
 run_names = {}
+
 
 class MLLoger(Logger):
     def log(self, step=None, epoch=None, batch=None, loss=None, acc=None, custom_logs=None):
@@ -72,7 +75,8 @@ class MLLoger(Logger):
                         if 'custom_keys' not in self.metadata['annotations']:
                             self.metadata['annotations']['custom_keys'] = []
                         if k not in self.metadata['annotations']['custom_keys']:
-                            self.metadata['annotations']['custom_keys'].append(k)
+                            self.metadata['annotations']['custom_keys'].append(
+                                k)
                         val[k] = v
         for k, _ in val.items():
             if k not in self.metadata['annotations']['keys']:
@@ -91,24 +95,32 @@ class CustomLogger(Logger):
 
 
 class Run():
-    def __init__(self, name="lab_run", user_id="user1", lab_id="lab1", org_id="", flush_interval_seconds=5,
+    def __init__(self, name="", user_id="", lab_id="", org_id="", flush_interval_seconds=5,
                  sys_stat_sample_size=1, sys_stat_sample_interval=2, local_path='', write_logs_to_local=False,
-                 remote_path='https://www.heywhale.com/api/runs', buffer_all_logs=False):
+                 remote_path='', buffer_all_logs=False):
+        if name == '':
+            name == '实验_' + str(randrange(999))
         if name in run_names:
             s = "name {} is already used in current session.".format(name)
             raise Exception(s)
+        # see if config file exist
+        f = open('~/.ide/config.json')
+        _data = json.load(f)
+        f.close()
+        remote_path = _data['website']['siteUrl']
         run_names[name] = self
         self._loggers = {}
         self.custom_loggers = {}
-        env_user_id = os.getenv("KLAB_USER_ID")
-        env_lab_id = os.getenv("KLAB_LAB_ID")
-        env_org_id = os.getenv("KLAB_ORG_ID")
+        env_user_id = _data['website']['user']['_id']
+        env_lab_id = _data['website']['lab']['_id']
+        env_org_id = _data['website']['org']['_id']
         timestr = str(mili_time())
         self.user_id = env_user_id if env_user_id else user_id
         self.lab_id = env_lab_id if env_lab_id else lab_id
         self.org_id = env_org_id if env_org_id else org_id
         if not (user_id and lab_id and org_id):
-            s = "At least one of required fields is empty:\nuser_id: {}\norg_id: {}\nlab_id: {}\n".format(user_id, org_id, lab_id)
+            s = "At least one of required fields is empty:\nuser_id: {}\norg_id: {}\nlab_id: {}\n".format(
+                user_id, org_id, lab_id)
             raise Exception(s)
         self.run_id = name + '_' + timestr
         self.flush_interval_seconds = max(5, flush_interval_seconds)
@@ -140,20 +152,20 @@ class Run():
         sys_path = path.join(
             self.local_path, "sys.json") if self.write_logs_to_local else ''
         self._loggers['train'] = MLLoger("train", sample_time_interval_seconds=self.flush_interval_seconds,
-                                          metadata=self.metadata, local_path=train_path, post_addr=self.logs_remote_path,
-                                          buffer_all=self.buffer_all_logs)
-        self._loggers['test'] = MLLoger("test", sample_time_interval_seconds=self.flush_interval_seconds,
-                                         metadata=self.metadata, local_path=test_path, post_addr=self.logs_remote_path,
+                                         metadata=self.metadata, local_path=train_path, post_addr=self.logs_remote_path,
                                          buffer_all=self.buffer_all_logs)
-        self._loggers['val'] = MLLoger("val", sample_time_interval_seconds=self.flush_interval_seconds,
-                                        metadata=self.metadata, local_path=val_path, post_addr=self.logs_remote_path,
+        self._loggers['test'] = MLLoger("test", sample_time_interval_seconds=self.flush_interval_seconds,
+                                        metadata=self.metadata, local_path=test_path, post_addr=self.logs_remote_path,
                                         buffer_all=self.buffer_all_logs)
+        self._loggers['val'] = MLLoger("val", sample_time_interval_seconds=self.flush_interval_seconds,
+                                       metadata=self.metadata, local_path=val_path, post_addr=self.logs_remote_path,
+                                       buffer_all=self.buffer_all_logs)
         self._loggers['system'] = CustomLogger("system", sample_time_interval_seconds=self.flush_interval_seconds,
-                                                metadata=self.metadata, local_path=sys_path, post_addr=self.logs_remote_path,
-                                                buffer_all=self.buffer_all_logs)
+                                               metadata=self.metadata, local_path=sys_path, post_addr=self.logs_remote_path,
+                                               buffer_all=self.buffer_all_logs)
         self._loggers['meta'] = CustomLogger("meta", sample_time_interval_seconds=self.flush_interval_seconds,
-                                                metadata=self.metadata, local_path=sys_path, post_addr=self.logs_remote_path,
-                                                buffer_all=self.buffer_all_logs)
+                                             metadata=self.metadata, local_path=sys_path, post_addr=self.logs_remote_path,
+                                             buffer_all=self.buffer_all_logs)
 
     def start_ml(self):
         if self.started:
@@ -166,7 +178,7 @@ class Run():
             clogger.start()
         self.sys_stat = SystemStats(self)
         self.sys_stat.start()
-    
+
     def log_meta(self, data):
         self._loggers['meta'].log(data)
 
@@ -177,7 +189,7 @@ class Run():
         if isinstance(acc, np.float32):
             acc = float(acc)
         self._loggers[phase].log(step=step, epoch=epoch,
-                                  batch=batch, loss=loss, acc=acc, custom_logs=custom_logs)
+                                 batch=batch, loss=loss, acc=acc, custom_logs=custom_logs)
 
     def new_custom_logger(self, name, local_path=''):
         self.custom_loggers[name] = CustomLogger(name, sample_time_interval_seconds=self.flush_interval_seconds,
@@ -253,7 +265,8 @@ class Run():
     def __abort_run(self, sig, reason):
         if self.remote_path:
             tp = int(time.time())
-            json_struct = {"metadata": self.metadata, "timestamp":tp, "signal": sig, "reason": reason}
+            json_struct = {"metadata": self.metadata,
+                           "timestamp": tp, "signal": sig, "reason": reason}
             for _ in range(3):
                 r = requests.post(self.abort_remote_path, json=json_struct, headers={"Authorization": jwt.encode(
                     {"whatever": "1"}, "857851b2-c28c-4d94-83c8-f607b50ccd03")})
@@ -290,7 +303,8 @@ class Run():
 
         if self.remote_path:
             tp = int(time.time())
-            json_struct = {"metadata": self.metadata, "best": [{"phase": name, "val": logger.memoize, _TIMESTAMP: tp} for name, logger in self._loggers.items()]}
+            json_struct = {"metadata": self.metadata, "best": [
+                {"phase": name, "val": logger.memoize, _TIMESTAMP: tp} for name, logger in self._loggers.items()]}
             for _ in range(3):
                 r = requests.post(self.conclude_remote_path, json=json_struct, headers={"Authorization": jwt.encode(
                     {"whatever": "1"}, "857851b2-c28c-4d94-83c8-f607b50ccd03")})
