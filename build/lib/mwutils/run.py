@@ -103,8 +103,10 @@ class Run():
         if name in run_names:
             s = "name {} is already used in current session.".format(name)
             raise Exception(s)
-        # TODO: see if config file exist
-        f = open('~/.ide/config.json')
+        # TODO: see if config file existaaaa
+        p = os.path.expanduser('~')
+        _path = p + '/.ide/config.json'
+        f = open(_path)
         _data = json.load(f)
         f.close()
         remote_path = _data['website']['siteUrl']
@@ -118,7 +120,7 @@ class Run():
         self.user_id = env_user_id if env_user_id else user_id
         self.lab_id = env_lab_id if env_lab_id else lab_id
         self.org_id = env_org_id if env_org_id else org_id
-        if not (user_id and lab_id and org_id):
+        if not (self.user_id and self.lab_id and self.org_id):
             s = "At least one of required fields is empty:\nuser_id: {}\norg_id: {}\nlab_id: {}\n".format(
                 user_id, org_id, lab_id)
             raise Exception(s)
