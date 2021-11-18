@@ -103,7 +103,7 @@ class Run():
         if name in run_names:
             s = "name {} is already used in current session.".format(name)
             raise Exception(s)
-        # see if config file exist
+        # TODO: see if config file exist
         f = open('~/.ide/config.json')
         _data = json.load(f)
         f.close()
