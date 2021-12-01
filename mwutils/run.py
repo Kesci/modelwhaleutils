@@ -106,10 +106,10 @@ class Run():
         # TODO: see if config file existaaaa
         p = os.path.expanduser('~')
         _path = p + '/.ide/config.json'
-        if os.path.isfile(_path):
-            f = open(_path)
-            _data = json.load(f)
-            f.close()
+        f = open(_path)
+        _data = json.load(f)
+        f.close()
+        if _data:
             remote_path = _data['website']['siteUrl']
             print('remote path', remote_path)
             run_names[name] = self
