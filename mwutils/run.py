@@ -111,6 +111,7 @@ class Run():
             _data = json.load(f)
             f.close()
             remote_path = _data['website']['siteUrl']
+            print('remote path', remote_path)
             run_names[name] = self
             self._loggers = {}
             self.custom_loggers = {}
