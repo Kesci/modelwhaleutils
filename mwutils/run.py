@@ -99,27 +99,47 @@ class Run():
                  sys_stat_sample_size=1, sys_stat_sample_interval=2, local_path='', write_logs_to_local=False,
                  remote_path='', buffer_all_logs=False):
         if name == '':
-            name == '实验_' + str(randrange(999))
+            name == '数据科学实验@' + str(randrange(999))
         if name in run_names:
             s = "name {} is already used in current session.".format(name)
             raise Exception(s)
         # TODO: see if config file existaaaa
         p = os.path.expanduser('~')
         _path = p + '/.ide/config.json'
-        f = open(_path)
-        _data = json.load(f)
-        f.close()
-        remote_path = _data['website']['siteUrl']
-        run_names[name] = self
-        self._loggers = {}
-        self.custom_loggers = {}
-        env_user_id = _data['website']['user']['_id']
-        env_lab_id = _data['website']['lab']['_id']
-        env_org_id = _data['website']['org']['_id']
+        if os.path.isfile(_path):
+            f = open(_path)
+            _data = json.load(f)
+            f.close()
+            remote_path = _data['website']['siteUrl']
+            run_names[name] = self
+            self._loggers = {}
+            self.custom_loggers = {}
+            config_user_id = _data['website']['user']['_id']
+            config_lab_id = _data['website']['lab']['_id']
+            config_org_id = _data['website']['org']['_id']
+        env_user_id = os.getenv("ENV_USER_ID")
+        env_lab_id = os.getenv("ENV_LAB_ID")
+        env_org_id = os.getenv("ENV_ORG_ID")
+        if config_user_id:
+            self.user_id = config_user_id
+        elif env_user_id:
+            self.user_id = env_user_id
+        else:
+            self.user_id = user_id
+        if config_lab_id:
+            self.lab_id = config_lab_id
+        elif env_lab_id:
+            self.lab_id = env_lab_id
+        else:
+            self.lab_id = lab_id
+
+        if config_org_id:
+            self.org_id = config_org_id
+        elif env_org_id:
+            self.org_id = env_org_id
+        else:
+            self.org_id = org_id
         timestr = str(mili_time())
-        self.user_id = env_user_id if env_user_id else user_id
-        self.lab_id = env_lab_id if env_lab_id else lab_id
-        self.org_id = env_org_id if env_org_id else org_id
         if not (self.user_id and self.lab_id and self.org_id):
             s = "At least one of required fields is empty:\nuser_id: {}\norg_id: {}\nlab_id: {}\n".format(
                 user_id, org_id, lab_id)
