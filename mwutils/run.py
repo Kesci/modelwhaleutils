@@ -110,8 +110,7 @@ class Run():
         _data = json.load(f)
         f.close()
         if _data:
-            remote_path = _data['website']['siteUrl']
-            print('remote path', remote_path)
+            _remote_path = _data['website']['siteUrl']
             run_names[name] = self
             self._loggers = {}
             self.custom_loggers = {}
@@ -133,13 +132,21 @@ class Run():
             self.lab_id = env_lab_id
         else:
             self.lab_id = lab_id
-
         if config_org_id:
             self.org_id = config_org_id
         elif env_org_id:
             self.org_id = env_org_id
         else:
             self.org_id = org_id
+
+        if remote_path:
+            self.remote_path = remote_path
+        elif _remote_path:
+            self.remote_path = _remote_path + '/api/runs'
+        else:
+            self.remote_path = 'https://www.heywhale.com/api/runs'
+
+        print('remotepath is', self.remote_path)
         timestr = str(mili_time())
         if not (self.user_id and self.lab_id and self.org_id):
             s = "At least one of required fields is empty:\nuser_id: {}\norg_id: {}\nlab_id: {}\n".format(
@@ -153,7 +160,6 @@ class Run():
         self.write_logs_to_local = write_logs_to_local
         self.logs_remote_path = remote_path + '/logs' if remote_path else ''
         self.conclude_remote_path = remote_path + '/conclude'
-        self.remote_path = remote_path
         self.abort_remote_path = remote_path + "/abort"
         self.buffer_all_logs = buffer_all_logs
         self.model_path = ""
