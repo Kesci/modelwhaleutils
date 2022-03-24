@@ -1,3 +1,4 @@
+from asyncio.windows_events import NULL
 import mwutils
 from mwutils.logs import Logger, mili_time
 from mwutils.sys_stat import SystemStats
@@ -105,6 +106,7 @@ class Run():
             raise Exception(s)
         p = os.path.expanduser('~')
         _path = p + '/.ide/config.json'
+        _data = None
         if os.path.exists(_path):
             f = open(_path)
             _data = json.load(f)
