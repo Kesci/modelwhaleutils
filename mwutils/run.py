@@ -103,12 +103,12 @@ class Run():
         if name in run_names:
             s = "name {} is already used in current session.".format(name)
             raise Exception(s)
-        # TODO: see if config file existaaaa
         p = os.path.expanduser('~')
         _path = p + '/.ide/config.json'
-        f = open(_path)
-        _data = json.load(f)
-        f.close()
+        if os.path.exists(_path):
+            f = open(_path)
+            _data = json.load(f)
+            f.close()
         if _data:
             _remote_path = _data['website']['siteUrl']
             run_names[name] = self

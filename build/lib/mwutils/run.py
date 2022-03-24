@@ -107,7 +107,6 @@ class Run():
         p = os.path.expanduser('~')
         _path = p + '/.ide/config.json'
         f = open(_path)
-        print(f)
         _data = json.load(f)
         f.close()
         if _data:
@@ -140,10 +139,10 @@ class Run():
         else:
             self.org_id = org_id
 
-        if _remote_path:
-            self.remote_path = _remote_path + '/api/runs'
-        elif remote_path:
+        if remote_path:
             self.remote_path = remote_path
+        elif _remote_path:
+            self.remote_path = _remote_path + '/api/runs'
         else:
             self.remote_path = 'https://www.heywhale.com/api/runs'
 
