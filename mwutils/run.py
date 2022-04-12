@@ -1,4 +1,3 @@
-from asyncio.windows_events import NULL
 import mwutils
 from mwutils.logs import Logger, mili_time
 from mwutils.sys_stat import SystemStats
@@ -107,18 +106,21 @@ class Run():
         p = os.path.expanduser('~')
         _path = p + '/.ide/config.json'
         _data = None
+        config_user_id = None
+        config_lab_id = None
+        config_org_id = None
         if os.path.exists(_path):
             f = open(_path)
             _data = json.load(f)
             f.close()
         if _data:
             _remote_path = _data['website']['siteUrl']
-            run_names[name] = self
-            self._loggers = {}
-            self.custom_loggers = {}
             config_user_id = _data['website']['user']['_id']
             config_lab_id = _data['website']['lab']['_id']
             config_org_id = _data['website']['org']['_id']
+        run_names[name] = self
+        self._loggers = {}
+        self.custom_loggers = {}
         env_user_id = os.getenv("ENV_USER_ID")
         env_lab_id = os.getenv("ENV_LAB_ID")
         env_org_id = os.getenv("ENV_ORG_ID")

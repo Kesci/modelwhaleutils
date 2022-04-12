@@ -1,0 +1,213 @@
+{
+    "_id": "623c5769755eec0017632a2e",
+    "status": "completed",
+    "updatedAt": "2022-03-24T11:42:21.201Z",
+    "name": "4567test",
+    "run": "4567test_1648121661409",
+    "userId": "6228c268f6d86400178f88fe",
+    "orgId": "6228c286f6d86400178f93a4",
+    "lab": "62327919deb0ae0017f969be",
+    "__v": 0,
+    "annotations": {
+        "custom_keys": [],
+        "keys": [
+            "timestamp",
+            "epoch",
+            "loss",
+            "acc"
+        ]
+    },
+    "metrics": [
+        {
+            "_id": "623c5769755eec0017632a30",
+            "batches": [
+                "623c5769755eec0017632a31"
+            ],
+            "run": "623c5769755eec0017632a2e",
+            "phase": "meta",
+            "__v": 0,
+            "latest": {
+                "timestamp": "2022-03-24T11:34:40.293Z",
+                "val": "{\"test\":1}"
+            },
+            "best": {
+                "val": "{}",
+                "timestamp": "1970-01-20T01:48:42.141Z"
+            },
+            "logs": [
+                {
+                    "_id": "623c5769755eec0017632a32",
+                    "timestamp": "2022-03-24T11:34:35.055Z",
+                    "val": "{\"NUM_CLASSES\":2}"
+                },
+                {
+                    "_id": "623c5769755eec0017632a33",
+                    "timestamp": "2022-03-24T11:34:40.293Z",
+                    "val": "{\"test\":1}"
+                }
+            ]
+        },
+        {
+            "_id": "623c576a755eec0017632a34",
+            "batches": [
+                "623c576a755eec0017632a35"
+            ],
+            "run": "623c5769755eec0017632a2e",
+            "phase": "system",
+            "__v": 0,
+            "latest": {
+                "timestamp": "2022-03-24T11:41:58.674Z",
+                "val": "{\"gpu.0.gpu\":0,\"gpu.0.memory\":0,\"gpu.0.memoryAllocated\":11.3,\"gpu.0.temp\":32,\"gpu.0.powerWatts\":34.9,\"gpu.0.powerPercent\":13.96,\"cpu\":1.98,\"memory\":15.6}"
+            },
+            "best": {
+                "val": "{}",
+                "timestamp": "1970-01-20T01:48:42.141Z"
+            },
+            "logs": [
+                {
+                    "_id": "623c576a755eec0017632a36",
+                    "timestamp": "2022-03-24T11:35:00.684Z",
+                    "val": "{\"gpu.0.gpu\":17.4,\"gpu.0.memory\":4,\"gpu.0.memoryAllocated\":8.96,\"gpu.0.temp\":32.6,\"gpu.0.powerWatts\":43.31,\"gpu.0.powerPercent\":17.32,\"cpu\":4.7,\"memory\":15.24}"
+                },
+                {
+                    "_id": "623c5787755eec0017632a3a",
+                    "timestamp": "2022-03-24T11:35:30.384Z",
+                    "val": "{\"gpu.0.gpu\":28.6,\"gpu.0.memory\":6.8,\"gpu.0.memoryAllocated\":11.3,\"gpu.0.temp\":33.6,\"gpu.0.powerWatts\":62.31,\"gpu.0.powerPercent\":24.92,\"cpu\":6.9,\"memory\":15.58}"
+                },
+                {
+                    "_id": "623c57a5755eec0017632a42",
+                    "timestamp": "2022-03-24T11:36:00.058Z",
+                    "val": "{\"gpu.0.gpu\":5.8,\"gpu.0.memory\":1.2,\"gpu.0.memoryAllocated\":11.3,\"gpu.0.temp\":34.2,\"gpu.0.powerWatts\":38.17,\"gpu.0.powerPercent\":15.27,\"cpu\":6.62,\"memory\":15.78}"
+                },
+                {
+                    "_id": "623c57c3755eec0017632a45",
+                    "timestamp": "2022-03-24T11:36:25.689Z",
+                    "val": "{\"gpu.0.gpu\":0,\"gpu.0.memory\":0,\"gpu.0.memoryAllocated\":11.3,\"gpu.0.temp\":33.4,\"gpu.0.powerWatts\":35.2,\"gpu.0.powerPercent\":14.08,\"cpu\":2.26,\"memory\":15.64}"
+                },
+                {
+                    "_id": "623c57e1755eec0017632a47",
+                    "timestamp": "2022-03-24T11:36:51.309Z",
+                    "val": "{\"gpu.0.gpu\":0,\"gpu.0.memory\":0,\"gpu.0.memoryAllocated\":11.3,\"gpu.0.temp\":33,\"gpu.0.powerWatts\":35.11,\"gpu.0.powerPercent\":14.04,\"cpu\":2,\"memory\":15.6}"
+                },
+                {
+                    "_id": "623c57ff755eec0017632a49",
+                    "timestamp": "2022-03-24T11:37:16.929Z",
+                    "val": "{\"gpu.0.gpu\":0,\"gpu.0.memory\":0,\"gpu.0.memoryAllocated\":11.3,\"gpu.0.temp\":33,\"gpu.0.powerWatts\":35.09,\"gpu.0.powerPercent\":14.03,\"cpu\":1.98,\"memory\":15.6}"
+                },
+                {
+                    "_id": "623c581d755eec0017632a4b",
+                    "timestamp": "2022-03-24T11:37:42.547Z",
+                    "val": "{\"gpu.0.gpu\":0,\"gpu.0.memory\":0,\"gpu.0.memoryAllocated\":11.3,\"gpu.0.temp\":33,\"gpu.0.powerWatts\":34.94,\"gpu.0.powerPercent\":13.98,\"cpu\":2.22,\"memory\":15.56}"
+                },
+                {
+                    "_id": "623c583b755eec0017632a4d",
+                    "timestamp": "2022-03-24T11:38:08.156Z",
+                    "val": "{\"gpu.0.gpu\":0,\"gpu.0.memory\":0,\"gpu.0.memoryAllocated\":11.3,\"gpu.0.temp\":32.2,\"gpu.0.powerWatts\":34.96,\"gpu.0.powerPercent\":13.98,\"cpu\":1.98,\"memory\":15.44}"
+                },
+                {
+                    "_id": "623c583b755eec0017632a4e",
+                    "timestamp": "2022-03-24T11:38:33.767Z",
+                    "val": "{\"gpu.0.gpu\":0,\"gpu.0.memory\":0,\"gpu.0.memoryAllocated\":11.3,\"gpu.0.temp\":32,\"gpu.0.powerWatts\":34.82,\"gpu.0.powerPercent\":13.93,\"cpu\":1.94,\"memory\":15.32}"
+                },
+                {
+                    "_id": "623c5859755eec0017632a50",
+                    "timestamp": "2022-03-24T11:38:59.379Z",
+                    "val": "{\"gpu.0.gpu\":0,\"gpu.0.memory\":0,\"gpu.0.memoryAllocated\":11.3,\"gpu.0.temp\":32,\"gpu.0.powerWatts\":34.84,\"gpu.0.powerPercent\":13.94,\"cpu\":1.96,\"memory\":15.3}"
+                },
+                {
+                    "_id": "623c5877755eec0017632a53",
+                    "timestamp": "2022-03-24T11:39:24.997Z",
+                    "val": "{\"gpu.0.gpu\":0,\"gpu.0.memory\":0,\"gpu.0.memoryAllocated\":11.3,\"gpu.0.temp\":32,\"gpu.0.powerWatts\":34.93,\"gpu.0.powerPercent\":13.97,\"cpu\":1.76,\"memory\":15.3}"
+                },
+                {
+                    "_id": "623c5895755eec0017632a55",
+                    "timestamp": "2022-03-24T11:39:50.610Z",
+                    "val": "{\"gpu.0.gpu\":0,\"gpu.0.memory\":0,\"gpu.0.memoryAllocated\":11.3,\"gpu.0.temp\":32,\"gpu.0.powerWatts\":34.91,\"gpu.0.powerPercent\":13.96,\"cpu\":2.08,\"memory\":15.34}"
+                },
+                {
+                    "_id": "623c58b3755eec0017632a57",
+                    "timestamp": "2022-03-24T11:40:16.223Z",
+                    "val": "{\"gpu.0.gpu\":0,\"gpu.0.memory\":0,\"gpu.0.memoryAllocated\":11.3,\"gpu.0.temp\":32,\"gpu.0.powerWatts\":34.82,\"gpu.0.powerPercent\":13.93,\"cpu\":1.72,\"memory\":15.44}"
+                },
+                {
+                    "_id": "623c58d1755eec0017632a59",
+                    "timestamp": "2022-03-24T11:40:41.835Z",
+                    "val": "{\"gpu.0.gpu\":0,\"gpu.0.memory\":0,\"gpu.0.memoryAllocated\":11.3,\"gpu.0.temp\":32,\"gpu.0.powerWatts\":34.82,\"gpu.0.powerPercent\":13.93,\"cpu\":2.06,\"memory\":15.54}"
+                },
+                {
+                    "_id": "623c58ef755eec0017632a5b",
+                    "timestamp": "2022-03-24T11:41:07.451Z",
+                    "val": "{\"gpu.0.gpu\":0,\"gpu.0.memory\":0,\"gpu.0.memoryAllocated\":11.3,\"gpu.0.temp\":32,\"gpu.0.powerWatts\":34.76,\"gpu.0.powerPercent\":13.9,\"cpu\":1.7,\"memory\":15.6}"
+                },
+                {
+                    "_id": "623c58ef755eec0017632a5c",
+                    "timestamp": "2022-03-24T11:41:33.062Z",
+                    "val": "{\"gpu.0.gpu\":0,\"gpu.0.memory\":0,\"gpu.0.memoryAllocated\":11.3,\"gpu.0.temp\":32,\"gpu.0.powerWatts\":34.91,\"gpu.0.powerPercent\":13.96,\"cpu\":1.76,\"memory\":15.6}"
+                },
+                {
+                    "_id": "623c590d755eec0017632a5e",
+                    "timestamp": "2022-03-24T11:41:58.674Z",
+                    "val": "{\"gpu.0.gpu\":0,\"gpu.0.memory\":0,\"gpu.0.memoryAllocated\":11.3,\"gpu.0.temp\":32,\"gpu.0.powerWatts\":34.9,\"gpu.0.powerPercent\":13.96,\"cpu\":1.98,\"memory\":15.6}"
+                }
+            ]
+        },
+        {
+            "_id": "623c5787755eec0017632a38",
+            "batches": [
+                "623c5787755eec0017632a3c"
+            ],
+            "run": "623c5769755eec0017632a2e",
+            "phase": "test",
+            "__v": 0,
+            "latest": {
+                "timestamp": "2022-03-24T11:35:58.987Z",
+                "val": "{\"timestamp\":1648121758,\"epoch\":2,\"loss\":0.07437195758456769,\"acc\":0.01}"
+            },
+            "best": {
+                "val": "{\"max_accuracy\":{\"timestamp\":1648121721,\"epoch\":1,\"loss\":0.07553348609286806,\"acc\":0.01},\"min_loss\":{\"timestamp\":1648121758,\"epoch\":2,\"loss\":0.07437195758456769,\"acc\":0.01},\"best_epoch\":2}",
+                "timestamp": "1970-01-20T01:48:42.141Z"
+            },
+            "logs": [
+                {
+                    "_id": "623c5787755eec0017632a3e",
+                    "timestamp": "2022-03-24T11:35:21.057Z",
+                    "val": "{\"timestamp\":1648121721,\"epoch\":1,\"loss\":0.07553348609286806,\"acc\":0.01}"
+                },
+                {
+                    "_id": "623c57a5755eec0017632a41",
+                    "timestamp": "2022-03-24T11:35:58.987Z",
+                    "val": "{\"timestamp\":1648121758,\"epoch\":2,\"loss\":0.07437195758456769,\"acc\":0.01}"
+                }
+            ]
+        },
+        {
+            "_id": "623c5787755eec0017632a39",
+            "batches": [
+                "623c5787755eec0017632a3b"
+            ],
+            "run": "623c5769755eec0017632a2e",
+            "phase": "train",
+            "__v": 0,
+            "latest": {
+                "timestamp": "2022-03-24T11:35:58.987Z",
+                "val": "{\"timestamp\":1648121758,\"epoch\":2,\"loss\":0.08906121674097246,\"acc\":0.01}"
+            },
+            "best": {
+                "val": "{\"max_accuracy\":{\"timestamp\":1648121721,\"epoch\":1,\"loss\":0.16075881142169238,\"acc\":0.01},\"min_loss\":{\"timestamp\":1648121758,\"epoch\":2,\"loss\":0.08906121674097246,\"acc\":0.01},\"best_epoch\":2}",
+                "timestamp": "1970-01-20T01:48:42.141Z"
+            },
+            "logs": [
+                {
+                    "_id": "623c5787755eec0017632a3d",
+                    "timestamp": "2022-03-24T11:35:21.057Z",
+                    "val": "{\"timestamp\":1648121721,\"epoch\":1,\"loss\":0.16075881142169238,\"acc\":0.01}"
+                },
+                {
+                    "_id": "623c57a5755eec0017632a40",
+                    "timestamp": "2022-03-24T11:35:58.987Z",
+                    "val": "{\"timestamp\":1648121758,\"epoch\":2,\"loss\":0.08906121674097246,\"acc\":0.01}"
+                }
+            ]
+        }
+    ]
+}
