@@ -217,11 +217,17 @@ class Run():
 
     def log_ml(self, step=None, epoch=None, batch=None, loss=None, acc=None, phase="train", custom_logs=None):
         # phase is the same thing with namea
-        try:
-            acc = float(acc)
-            loss = float(loss)
-        except:
-            raise TypeError('acc or loss cannot be transferred to float!')
+        if acc is not None:
+            try:
+                acc = float(acc)
+            except:
+                raise TypeError('acc cannot be transferred to float!')
+
+        if loss is not None:
+            try:
+                loss = float(loss)
+            except:
+                raise TypeError('loss cannot be transferred to float!')
      
         self._loggers[phase].log(step=step, epoch=epoch,
                                  batch=batch, loss=loss, acc=acc, custom_logs=custom_logs)
