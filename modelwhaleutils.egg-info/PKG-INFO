@@ -1,12 +1,9 @@
-Metadata-Version: 1.2
+Metadata-Version: 2.1
 Name: modelwhaleutils
-Version: 0.4.9.1
+Version: 0.4.9.2
 Summary: use in mw
 Home-page: https://github.com/Kesci/modelwhaleutils
 Author: modalwhale team
-License: UNKNOWN
-Description: UNKNOWN
-Platform: UNKNOWN
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Operating System :: OS Independent

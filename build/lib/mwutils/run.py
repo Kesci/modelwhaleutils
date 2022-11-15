@@ -228,7 +228,7 @@ class Run():
                 loss = float(loss)
             except:
                 raise TypeError('loss cannot be transferred to float!')
-     
+
         self._loggers[phase].log(step=step, epoch=epoch,
                                  batch=batch, loss=loss, acc=acc, custom_logs=custom_logs)
 
@@ -329,7 +329,7 @@ class Run():
         self.started = False
         self.run_id = "aborted"
 
-    def conclude(self, show_memoize=True, upload_model=False, model_path="./saved_model"):
+    def conclude(self, show_memoize=True, save_model=False, model_path="./saved_model", target=None):
         if not self.started:
             pass
         for _, logger in self._loggers.items():
@@ -340,7 +340,33 @@ class Run():
             clogger.cancel()
             if show_memoize and clogger.memoize:
                 print(clogger.name, clogger.memoize)
-        self._save_model(model_path)
+
+        if save_model == True:
+            class_type = type(target)
+            if target == None:
+                print('no model specified, skipping')
+                pass
+            else:
+                if 'keras' in class_type:
+                    print('Keras Model detected, saving to ./saved_model.pb')
+                    target.save('saved_model.pb')
+                if 'tensorflow' in class_type and 'keras' not in class_type:
+                    if target._closed:
+                        print(
+                            'session closed, please run conclude() function in session')
+                        return
+                    else:
+                        print('Tensorflow Model detected, saving to ./saved_model.pb')
+                        import tensorflow as tf
+                        saver = tf.train.Saver()
+                        saver.save(target, 'saved_model.pb')
+                else:
+                    if target.state_dict:
+                        print('Torch Model detected, saving to ./saved_model.pth')
+                        import torch
+                        torch.save(target.state_dict(), 'saved_model.pth')
+                    else:
+                        print('model cannot be saved, please check format')
 
         if self.remote_path:
             tp = int(time.time())

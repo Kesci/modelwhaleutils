@@ -95,7 +95,7 @@ class CustomLogger(Logger):
 
 
 class Run():
-    def __init__(self, name="", user_id="", lab_id="", org_id="", flush_interval_seconds=5,
+    def __init__(self, name="", user_id="", lab_id="", org_id="", user_token="", flush_interval_seconds=5,
                  sys_stat_sample_size=1, sys_stat_sample_interval=2, local_path='', write_logs_to_local=False,
                  remote_path='', buffer_all_logs=False):
         if name == '':
@@ -109,6 +109,7 @@ class Run():
         config_user_id = None
         config_lab_id = None
         config_org_id = None
+        config_user_token = None
         if os.path.exists(_path):
             f = open(_path)
             _data = json.load(f)
@@ -118,24 +119,35 @@ class Run():
             config_user_id = _data['website']['user']['_id']
             config_lab_id = _data['website']['lab']['_id']
             config_org_id = _data['website']['org']['_id']
+            config_user_token = _data['website']['token']
         run_names[name] = self
         self._loggers = {}
         self.custom_loggers = {}
         env_user_id = os.getenv("ENV_USER_ID")
         env_lab_id = os.getenv("ENV_LAB_ID")
         env_org_id = os.getenv("ENV_ORG_ID")
+        env_user_token = os.getenv("ENV_USER_TOKEN")
         if config_user_id:
             self.user_id = config_user_id
         elif env_user_id:
             self.user_id = env_user_id
         else:
             self.user_id = user_id
+
         if config_lab_id:
             self.lab_id = config_lab_id
         elif env_lab_id:
             self.lab_id = env_lab_id
         else:
             self.lab_id = lab_id
+
+        if config_user_token:
+            self.user_token = config_user_token
+        elif env_user_token:
+            self.user_token = config_user_token
+        else:
+            self.user_token = user_token
+
         if config_org_id:
             self.org_id = config_org_id
         elif env_org_id:
@@ -228,7 +240,7 @@ class Run():
                 loss = float(loss)
             except:
                 raise TypeError('loss cannot be transferred to float!')
-     
+
         self._loggers[phase].log(step=step, epoch=epoch,
                                  batch=batch, loss=loss, acc=acc, custom_logs=custom_logs)
 
@@ -341,6 +353,9 @@ class Run():
             if show_memoize and clogger.memoize:
                 print(clogger.name, clogger.memoize)
         self._save_model(model_path)
+
+        if upload_model:
+            self.__upload_model()
 
         if self.remote_path:
             tp = int(time.time())
