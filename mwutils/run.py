@@ -1,24 +1,22 @@
-import mwutils
-from mwutils.logs import Logger, mili_time
-from mwutils.sys_stat import SystemStats
-
-import os
-import requests
-import warnings
-import jwt
-import time
-import traceback
-import signal
-import json
-import boto3
-import botocore
-import time
-import logging
-
-import numpy as np
-from os import path, getpid
-from random import randrange
 from botocore.exceptions import ClientError
+from random import randrange
+from os import path, getpid
+import numpy as np
+import logging
+import botocore
+import boto3
+import json
+import signal
+import traceback
+import time
+import jwt
+import warnings
+import requests
+import os
+from mwutils.sys_stat import SystemStats
+from mwutils.logs import Logger, mili_time
+import mwutils
+% % writefile / opt/conda/lib/python3.6/site-packages/mwutils/run.py
 
 
 _STEP = 'step'
@@ -156,12 +154,13 @@ class Run():
         else:
             self.org_id = org_id
 
-        if config_token:
-            self.user_token = config_token
-        elif env_token:
-            self.user_token = config_token
-        else:
-            self.user_token = user_token
+        self.user_token = user_token
+        # if config_token:
+        #     self.user_token = config_token
+        # elif env_token:
+        #     self.user_token = config_token
+        # else:
+        #     self.user_token = user_token
 
         if remote_path:
             self.remote_path = remote_path
@@ -363,8 +362,6 @@ class Run():
 
         if save_model == True:
             class_type = str(type(target))
-            import os
-            import time
             epoch_time = int(time.time())
             os.mkdir(str(epoch_time))
             _path = str(epoch_time)
@@ -419,7 +416,8 @@ class Run():
                                      aws_session_token=Session
                                      )
 
-            upload_dir = '~/project/' + _path
+            upload_dir = _path
+            print(upload_dir)
             for subdir, dirs, files in os.walk(upload_dir):
                 for file in files:
                     fullpath = os.path.join(subdir, file)
