@@ -1,6 +1,7 @@
 import mwutils
 from mwutils.logs import Logger, mili_time
 from mwutils.sys_stat import SystemStats
+
 import os
 import requests
 import warnings
@@ -9,9 +10,16 @@ import time
 import traceback
 import signal
 import json
+import boto3
+import botocore
+import time
+import logging
+
 import numpy as np
 from os import path, getpid
 from random import randrange
+from botocore.exceptions import ClientError
+
 
 _STEP = 'step'
 _EPOCH = 'epoch'
@@ -109,7 +117,7 @@ class Run():
         config_user_id = None
         config_lab_id = None
         config_org_id = None
-        config_user_token = None
+        config_token = None
         if os.path.exists(_path):
             f = open(_path)
             _data = json.load(f)
@@ -119,21 +127,21 @@ class Run():
             config_user_id = _data['website']['user']['_id']
             config_lab_id = _data['website']['lab']['_id']
             config_org_id = _data['website']['org']['_id']
-            config_user_token = _data['website']['token']
+            config_token = _data['website']['token']
         run_names[name] = self
         self._loggers = {}
         self.custom_loggers = {}
         env_user_id = os.getenv("ENV_USER_ID")
         env_lab_id = os.getenv("ENV_LAB_ID")
         env_org_id = os.getenv("ENV_ORG_ID")
-        env_user_token = os.getenv("ENV_USER_TOKEN")
+        env_token = os.getenv("ENV_TOKEN")
+
         if config_user_id:
             self.user_id = config_user_id
         elif env_user_id:
             self.user_id = env_user_id
         else:
             self.user_id = user_id
-
         if config_lab_id:
             self.lab_id = config_lab_id
         elif env_lab_id:
@@ -141,19 +149,19 @@ class Run():
         else:
             self.lab_id = lab_id
 
-        if config_user_token:
-            self.user_token = config_user_token
-        elif env_user_token:
-            self.user_token = config_user_token
-        else:
-            self.user_token = user_token
-
         if config_org_id:
             self.org_id = config_org_id
         elif env_org_id:
             self.org_id = env_org_id
         else:
             self.org_id = org_id
+
+        if config_token:
+            self.user_token = config_token
+        elif env_token:
+            self.user_token = config_token
+        else:
+            self.user_token = user_token
 
         if remote_path:
             self.remote_path = remote_path
@@ -341,7 +349,7 @@ class Run():
         self.started = False
         self.run_id = "aborted"
 
-    def conclude(self, show_memoize=True, upload_model=False, model_path="./saved_model"):
+    def conclude(self, show_memoize=True, save_model=False, model_path="./saved_model", target=None):
         if not self.started:
             pass
         for _, logger in self._loggers.items():
@@ -352,10 +360,78 @@ class Run():
             clogger.cancel()
             if show_memoize and clogger.memoize:
                 print(clogger.name, clogger.memoize)
-        self._save_model(model_path)
 
-        if upload_model:
-            self.__upload_model()
+        if save_model == True:
+            class_type = str(type(target))
+            import os
+            import time
+            epoch_time = int(time.time())
+            os.mkdir(str(epoch_time))
+            _path = str(epoch_time)
+            if target == None:
+                print('no model specified, skipping')
+                pass
+            else:
+                if 'keras' in class_type:
+                    _save_path = _path + '/saved_model.pb'
+                    print('Keras Model detected, saving to ' + _save_path)
+                    target.save(_save_path)
+                    pass
+                if 'tensorflow' in class_type and 'keras' not in class_type:
+                    if target._closed:
+                        print(
+                            'session closed, please run conclude() function in session')
+                        return
+                    else:
+                        _save_path = _path + '/saved_model.pb'
+                        print('Tensorflow Model detected, saving to ' + _save_path)
+                        import tensorflow as tf
+                        saver = tf.train.Saver()
+                        saver.save(target, _save_path)
+                        pass
+                elif 'tensorflow' not in class_type and 'keras' not in class_type:
+                    try:
+                        _save_path = _path + '/saved_model.pth'
+                        print('Torch Model detected, saving to ' + _save_path)
+                        import torch
+                        torch.save(target.state_dict(), _save_path)
+                        pass
+                    except:
+                        print('model cannot be saved, please check format')
+
+            path_artifact = '/api/dataset-upload-token?subType=artifact'
+            endpoint_get_token = self.remote_path.replace(
+                '/api/runs', path_artifact) + '&token=' + self.user_token
+            r = requests.get(endpoint_get_token)
+            oss_config = json.loads(r.text)
+            AK = oss_config['accessKeyId']
+            SK = oss_config['secretAccessKey']
+            region = oss_config['region']
+            Session = oss_config['sessionToken']
+            bucket = oss_config['bucket']
+
+            epoch_time = int(time.time())
+
+            s3_client = boto3.client('s3',
+                                     region_name=region,
+                                     aws_access_key_id=AK,
+                                     aws_secret_access_key=SK,
+                                     aws_session_token=Session
+                                     )
+
+            upload_dir = '~/project/' + _path
+            for subdir, dirs, files in os.walk(upload_dir):
+                for file in files:
+                    fullpath = os.path.join(subdir, file)
+                    try:
+                        object_name = oss_config['prefixToSave'] + \
+                            str(epoch_time) + '/' + file
+                        print('uploading file: ', fullpath)
+                        response = s3_client.upload_file(
+                            fullpath, bucket, object_name)
+                    except ClientError as e:
+                        logging.error(e)
+                        print('Error uploading file ', file)
 
         if self.remote_path:
             tp = int(time.time())
@@ -379,8 +455,8 @@ class Run():
                 else:
                     print("conclude remote call succeed. resp:", r)
                     break
-        if upload_model:
-            self.__upload_model()
+        # if upload_model:
+        #     self.__upload_model()
         self.started = False
         self.run_id = "concluded"
 
