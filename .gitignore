@@ -1,3 +1,4 @@
 ./test.ipynb
 .VSCodeCounter/
 ./dist
+/dist/*

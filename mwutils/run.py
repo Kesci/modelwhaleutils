@@ -16,7 +16,6 @@ import os
 from mwutils.sys_stat import SystemStats
 from mwutils.logs import Logger, mili_time
 import mwutils
-% % writefile / opt/conda/lib/python3.6/site-packages/mwutils/run.py
 
 
 _STEP = 'step'
@@ -154,13 +153,15 @@ class Run():
         else:
             self.org_id = org_id
 
-        self.user_token = user_token
-        # if config_token:
-        #     self.user_token = config_token
-        # elif env_token:
-        #     self.user_token = config_token
-        # else:
-        #     self.user_token = user_token
+        # self.user_token = user_token
+        if config_token:
+            print('using config_token')
+            self.user_token = config_token
+        elif env_token:
+            print('using env_token')
+            self.user_token = config_token
+        else:
+            self.user_token = user_token
 
         if remote_path:
             self.remote_path = remote_path
@@ -361,6 +362,9 @@ class Run():
                 print(clogger.name, clogger.memoize)
 
         if save_model == True:
+            if self.user_token == '':
+                print('token not specified, please check')
+                return
             class_type = str(type(target))
             epoch_time = int(time.time())
             os.mkdir(str(epoch_time))
@@ -417,7 +421,7 @@ class Run():
                                      )
 
             upload_dir = _path
-            print(upload_dir)
+            prefixes = []
             for subdir, dirs, files in os.walk(upload_dir):
                 for file in files:
                     fullpath = os.path.join(subdir, file)
@@ -427,14 +431,17 @@ class Run():
                         print('uploading file: ', fullpath)
                         response = s3_client.upload_file(
                             fullpath, bucket, object_name)
+                        prefixes.append(object_name)
                     except ClientError as e:
                         logging.error(e)
                         print('Error uploading file ', file)
-
         if self.remote_path:
             tp = int(time.time())
-            json_struct = {"metadata": self.metadata, "best": [
-                {"phase": name, "val": logger.memoize, _TIMESTAMP: tp} for name, logger in self._loggers.items()]}
+            json_struct = {
+                "metadata": self.metadata,
+                "files": prefixes,
+                "best": [{"phase": name, "val": logger.memoize, _TIMESTAMP: tp} for name, logger in self._loggers.items()],
+            }
             for _ in range(3):
                 r = requests.post(self.conclude_remote_path, json=json_struct, headers={"Authorization": jwt.encode(
                     {"whatever": "1"}, "857851b2-c28c-4d94-83c8-f607b50ccd03")})
