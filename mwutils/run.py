@@ -159,7 +159,7 @@ class Run():
             self.user_token = config_token
         elif env_token:
             print('using env_token')
-            self.user_token = config_token
+            self.user_token = env_token
         else:
             self.user_token = user_token
 
