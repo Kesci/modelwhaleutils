@@ -360,7 +360,7 @@ class Run():
             clogger.cancel()
             if show_memoize and clogger.memoize:
                 print(clogger.name, clogger.memoize)
-
+        prefixes = []
         if save_model == True:
             if self.user_token == '':
                 print('token not specified, please check')
@@ -421,7 +421,6 @@ class Run():
                                      )
 
             upload_dir = _path
-            prefixes = []
             for subdir, dirs, files in os.walk(upload_dir):
                 for file in files:
                     fullpath = os.path.join(subdir, file)
@@ -439,9 +438,10 @@ class Run():
             tp = int(time.time())
             json_struct = {
                 "metadata": self.metadata,
-                "files": prefixes,
                 "best": [{"phase": name, "val": logger.memoize, _TIMESTAMP: tp} for name, logger in self._loggers.items()],
             }
+            if len(prefixes) > 0:
+                json_struct['files'] = prefixes
             for _ in range(3):
                 r = requests.post(self.conclude_remote_path, json=json_struct, headers={"Authorization": jwt.encode(
                     {"whatever": "1"}, "857851b2-c28c-4d94-83c8-f607b50ccd03")})
