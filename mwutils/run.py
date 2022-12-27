@@ -99,6 +99,51 @@ class CustomLogger(Logger):
     pass
 
 
+def save_tf_ckpt(sess, directory, filename):
+    import tensorflow as tf
+    from tensorflow.python.framework import graph_util
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    filepath = os.path.join(directory, filename + '.ckpt')
+    saver = tf.train.Saver()
+    saver.save(sess, filepath)
+    return filepath
+
+
+def save_as_pb(sess, directory, filename, output_node):
+    import tensorflow as tf
+    from tensorflow.python.tools import freeze_graph
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    # Save check point for graph frozen later
+    ckpt_filepath = save_tf_ckpt(sess, directory=directory, filename=filename)
+    pbtxt_filename = filename + '.pbtxt'
+    pbtxt_filepath = os.path.join(directory, pbtxt_filename)
+    pb_filepath = os.path.join(directory, filename + '.pb')
+    # This will only save the graph but the variables will not be saved.
+    # You have to freeze your model first.
+    tf.train.write_graph(
+        graph_or_graph_def=sess.graph_def,
+        logdir=directory,
+        name=pbtxt_filename,
+        as_text=True)
+
+    freeze_graph.freeze_graph(
+        input_graph=pbtxt_filepath,
+        input_saver='',
+        input_binary=False,
+        input_checkpoint=ckpt_filepath,
+        output_node_names=output_node,
+        restore_op_name='save/restore_all',
+        filename_tensor_name='save/Const:0',
+        output_graph=pb_filepath,
+        clear_devices=True,
+        initializer_nodes='')
+
+    return pb_filepath
+
+
 class Run():
     def __init__(self, name="", user_id="", lab_id="", org_id="", user_token="", flush_interval_seconds=5,
                  sys_stat_sample_size=1, sys_stat_sample_interval=2, local_path='', write_logs_to_local=False,
@@ -349,7 +394,7 @@ class Run():
         self.started = False
         self.run_id = "aborted"
 
-    def conclude(self, show_memoize=True, save_model=False, model_path="./saved_model", target=None):
+    def conclude(self, show_memoize=True, save_model=False, model_path="./saved_model", target=None, output_node=None, use_jit=False):
         if not self.started:
             pass
         for _, logger in self._loggers.items():
@@ -379,24 +424,32 @@ class Run():
                     target.save(_save_path)
                     pass
                 if 'tensorflow' in class_type and 'keras' not in class_type:
+                    import tensorflow as tf
                     if target._closed:
                         print(
                             'session closed, please run conclude() function in session')
                         return
                     else:
-                        _save_path = _path + '/saved_model.pb'
+                        # tf 1
+                        _save_path = _path + '/saved_model'
                         print('Tensorflow Model detected, saving to ' + _save_path)
-                        import tensorflow as tf
-                        saver = tf.train.Saver()
-                        saver.save(target, _save_path)
+                        # saver = tf.train.Saver()
+                        # saver.save(target, _save_path)
+                        save_as_pb(target, _path, 'saved_model', output_node)
                         pass
                 elif 'tensorflow' not in class_type and 'keras' not in class_type:
                     try:
+                        # torch
                         _save_path = _path + '/saved_model.pth'
-                        print('Torch Model detected, saving to ' + _save_path)
-                        import torch
-                        torch.save(target.state_dict(), _save_path)
-                        pass
+                        if use_jit:
+                            print(
+                                'TorchScript Model detected, saving to ' + _save_path)
+                            target.save(_save_path)
+                        else:
+                            print('Torch Model detected, saving to ' + _save_path)
+                            import torch
+                            torch.save(target.state_dict(), _save_path)
+                            pass
                     except:
                         print('model cannot be saved, please check format')
 
