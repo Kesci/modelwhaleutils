@@ -11,6 +11,7 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    install_requires=["PyJWT", "requests", "pynvml", "psutil", "boto3"],
+    install_requires=["PyJWT", "requests",
+                      "pynvml", "psutil", "boto3", "mlflow"],
     python_requires='>=3.6',
 )

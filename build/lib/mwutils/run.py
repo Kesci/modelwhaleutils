@@ -91,59 +91,8 @@ class MLLoger(Logger):
         super().log(val)
 
 
-def example_memoize_func(memoize_buf, val):
-    if "cost" in val:
-        if "min_cost" in memoize_buf and memoize_buf["min_cost"] > val["cost"]:
-            memoize_buf["min_cost"] = val["cost"]
-
-
 class CustomLogger(Logger):
     pass
-
-
-def save_tf_ckpt(sess, directory, filename):
-    import tensorflow as tf
-    from tensorflow.python.framework import graph_util
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-    filepath = os.path.join(directory, filename + '.ckpt')
-    saver = tf.train.Saver()
-    saver.save(sess, filepath)
-    return filepath
-
-
-def save_as_pb(sess, directory, filename, output_node):
-    import tensorflow as tf
-    from tensorflow.python.tools import freeze_graph
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-
-    # Save check point for graph frozen later
-    ckpt_filepath = save_tf_ckpt(sess, directory=directory, filename=filename)
-    pbtxt_filename = filename + '.pbtxt'
-    pbtxt_filepath = os.path.join(directory, pbtxt_filename)
-    pb_filepath = os.path.join(directory, filename + '.pb')
-    # This will only save the graph but the variables will not be saved.
-    # You have to freeze your model first.
-    tf.train.write_graph(
-        graph_or_graph_def=sess.graph_def,
-        logdir=directory,
-        name=pbtxt_filename,
-        as_text=True)
-
-    freeze_graph.freeze_graph(
-        input_graph=pbtxt_filepath,
-        input_saver='',
-        input_binary=False,
-        input_checkpoint=ckpt_filepath,
-        output_node_names=output_node,
-        restore_op_name='save/restore_all',
-        filename_tensor_name='save/Const:0',
-        output_graph=pb_filepath,
-        clear_devices=True,
-        initializer_nodes='')
-
-    return pb_filepath
 
 
 class Run():
@@ -153,7 +102,7 @@ class Run():
         if use_mlflow == True:
             active_run = mlflow.active_run()
             if active_run is None:
-                raise Exception("没有找到已创建的 mlflow run")
+                raise MlFlowRunNotFould("没有找到已创建的 mlflow run")
         if name == '':
             name == '数据科学实验@' + str(randrange(999))
         if name in run_names:
@@ -221,7 +170,7 @@ class Run():
         else:
             self.remote_path = 'https://www.heywhale.com/api/runs'
 
-        print('remotepath is', self.remote_path)
+        print('api 地址: ', self.remote_path)
         timestr = str(mili_time())
         if not (self.user_id and self.lab_id and self.org_id):
             s = "At least one of required fields is empty:\nuser_id: {}\norg_id: {}\nlab_id: {}\n".format(
