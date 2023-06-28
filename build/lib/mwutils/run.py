@@ -143,7 +143,7 @@ class Run():
         self.started = False
         # 创建一个 RUN
         _request_meta = {
-            'metadata': {
+            'meatadata': {
                 'name': name,
                 'user_id': self.user_id,
                 'run_id': self.run_id,
@@ -152,9 +152,8 @@ class Run():
             }
         }
         if self.use_mlflow:
-            _addr = remote_path + '/linkMLFlow'
-            print("post mlflow address", _addr)
-            _request_meta['use_mlflow'] = True
+            _addr = self.remote_path + '/linkMLFlow'
+            _request_meta['use_mlfow'] = True
             _request_meta['mlflow_run'] = self.mlflow_run
             create_run(_request_meta, _addr)
         else:
