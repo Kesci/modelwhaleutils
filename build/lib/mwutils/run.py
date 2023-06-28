@@ -39,62 +39,6 @@ MODEL_TYPE_CUSTOM = "custom"
 run_names = {}
 
 
-class MLLoger(Logger):
-    def log(self, step=None, epoch=None, batch=None, loss=None, acc=None, custom_logs=None):
-        val = dict()
-        val[_TIMESTAMP] = int(time.time())
-        if step is not None:
-            val[_STEP] = step + 1
-        if epoch is not None:
-            val[_EPOCH] = epoch + 1
-        if batch is not None:
-            val[_BATCH] = batch + 1
-        if loss is not None:
-            val[_LOSS] = loss
-        if acc is not None:
-            val[_ACC] = acc
-
-        if acc:
-            if _MAX_ACC not in self.memoize and acc:
-                self.memoize[_MAX_ACC] = val
-            elif self.memoize[_MAX_ACC][_ACC] < val[_ACC]:
-                self.memoize[_MAX_ACC] = val
-
-        if loss:
-            best = False
-            if _MIN_LOSS not in self.memoize and loss:
-                self.memoize[_MIN_LOSS] = val
-                best = True
-            elif self.memoize[_MIN_LOSS][_LOSS] > val[_LOSS]:
-                self.memoize[_MIN_LOSS] = val
-                best = True
-            if best:
-                if step is not None:
-                    self.memoize["{}_{}".format(_BEST, _STEP)] = step+1
-                elif epoch is not None:
-                    self.memoize["{}_{}".format(_BEST, _EPOCH)] = epoch+1
-                elif batch is not None:
-                    self.memoize["{}_{}".format(_BEST, _BATCH)] = batch+1
-        if custom_logs:
-            if isinstance(custom_logs, dict):
-                for k, v in custom_logs.items():
-                    if k not in ['loss', 'acc', 'accuracy', 'val_loss', 'val_acc', 'val_accuracy']:
-                        if 'custom_keys' not in self.metadata['annotations']:
-                            self.metadata['annotations']['custom_keys'] = []
-                        if k not in self.metadata['annotations']['custom_keys']:
-                            self.metadata['annotations']['custom_keys'].append(
-                                k)
-                        val[k] = v
-        for k, _ in val.items():
-            if k not in self.metadata['annotations']['keys']:
-                self.metadata['annotations']['keys'].append(k)
-        super().log(val)
-
-
-class CustomLogger(Logger):
-    pass
-
-
 class Run():
     def __init__(self, name="", user_id="", lab_id="", org_id="", user_token="", use_mlflow=True, flush_interval_seconds=5,
                  sys_stat_sample_size=1, sys_stat_sample_interval=2, local_path='', write_logs_to_local=False,
@@ -103,8 +47,14 @@ class Run():
             active_run = mlflow.active_run()
             if active_run is None:
                 raise MlFlowRunNotFould("没有找到已创建的 mlflow run")
+            else:
+                self.use_mlflow = True
+                self.mlflow_run = active_run
         if name == '':
-            name == '数据科学实验@' + str(randrange(999))
+            if self.use_mlflow == True and self.mlflow_run is not None:
+                name = self.mlflow_run.info.run_name
+            else:
+                name = '数据科学实验@' + str(randrange(999))
         if name in run_names:
             s = "name {} is already used in current session.".format(name)
             raise Exception(s)
@@ -191,6 +141,23 @@ class Run():
                          "lab_id": lab_id, "run_id": self.run_id, "org_id": org_id, "annotations": {"custom_keys": [], "keys": []}}
         self.pid = None
         self.started = False
+        # 创建一个 RUN
+        _request_meta = {
+            'meatadata': {
+                'name': name,
+                'user_id': self.user_id,
+                'run_id': self.run_id,
+                'lab_id': self.lab_id,
+                'org_id': self.org_id
+            }
+        }
+        if self.use_mlflow:
+            _addr = remote_path + '/linkMLFlow'
+            _request_meta['use_mlfow'] = True
+            _request_meta['mlflow_run'] = self.mlflow_run
+            create_run(_request_meta, _addr)
+        else:
+            create_run(_request_meta, self.logs_remote_path)
 
     def init_ml(self):
         if self.pid:
@@ -477,37 +444,3 @@ class Run():
         #     self.__upload_model()
         self.started = False
         self.run_id = "concluded"
-
-
-if __name__ == "__main__":
-    import time
-
-    def sys_memoize_func_maxcpu(memoize_buf, val):
-        if "cpu" in val:
-            if "max_cpu" in memoize_buf and memoize_buf["max_cpu"] < val["cpu"]:
-                memoize_buf["max_cpu"] = val["cpu"]
-            if "max_cpu" not in memoize_buf:
-                memoize_buf["max_cpu"] = val["cpu"]
-
-    def sys_memoize_func_mincpu(memoize_buf, val):
-        if "cpu" in val:
-            if "min_cpu" in memoize_buf and memoize_buf["min_cpu"] > val["cpu"]:
-                memoize_buf["min_cpu"] = val["cpu"]
-            if "min_cpu" not in memoize_buf:
-                memoize_buf["min_cpu"] = val["cpu"]
-
-    r = Run("test88", "testuser123", "proj123", "job123", flush_interval_seconds=5,
-            local_path="/Users/mk/heyw/github/mwutils/mwutils", sys_stat_sample_interval=5, sys_stat_sample_size=21, buffer_all_logs=True)
-    r.init_ml()
-    r.add_memoize_funcs_to_logger(
-        "system", [sys_memoize_func_maxcpu, sys_memoize_func_mincpu])
-
-    r.start_ml()
-
-    for i in range(150):
-        r.log_ml(step=i, acc=i*(1/150), loss=149-i)
-        time.sleep(0.2)
-    for i in range(20):
-        r.log_ml(epoch=i, acc=i*(1/40)+0.5, loss=1, phase='test')
-        time.sleep(0.2)
-    r.conclude()

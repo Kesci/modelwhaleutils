@@ -1,3 +1,92 @@
+import threading
+import time
+import os
+import requests
+import warnings
+import json
+import atexit
+import jwt
+
+
+def create_run(payload, post_addr):
+    json_struct = {"metadata": payload.metadata}
+    if payload.use_mlflow == True:
+        json_struct['mlflow_run_id'] = payload.mlflow_run.info.run_uuid
+    for _ in range(3):
+        r = requests.post(post_addr, json=json_struct, headers={"Authorization": jwt.encode(
+            {"whatever": "1"}, "857851b2-c28c-4d94-83c8-f607b50ccd03")})
+        if r.status_code >= 400:
+            # something wrong
+            jb = ''
+            try:
+                jb = r.json()
+            except:
+                pass
+            print("resp:", r)
+            warnings.warn("code: {}, resp.json: {}, resp.text: {}".format(
+                r.status_code, jb, r.text))
+        else:
+            print("modelwhale run 生成成功")
+            return True
+    return False
+
+
+class MLLoger(Logger):
+    def log(self, step=None, epoch=None, batch=None, loss=None, acc=None, custom_logs=None):
+        val = dict()
+        val[_TIMESTAMP] = int(time.time())
+        if step is not None:
+            val[_STEP] = step + 1
+        if epoch is not None:
+            val[_EPOCH] = epoch + 1
+        if batch is not None:
+            val[_BATCH] = batch + 1
+        if loss is not None:
+            val[_LOSS] = loss
+        if acc is not None:
+            val[_ACC] = acc
+
+        if acc:
+            if _MAX_ACC not in self.memoize and acc:
+                self.memoize[_MAX_ACC] = val
+            elif self.memoize[_MAX_ACC][_ACC] < val[_ACC]:
+                self.memoize[_MAX_ACC] = val
+
+        if loss:
+            best = False
+            if _MIN_LOSS not in self.memoize and loss:
+                self.memoize[_MIN_LOSS] = val
+                best = True
+            elif self.memoize[_MIN_LOSS][_LOSS] > val[_LOSS]:
+                self.memoize[_MIN_LOSS] = val
+                best = True
+            if best:
+                if step is not None:
+                    self.memoize["{}_{}".format(_BEST, _STEP)] = step+1
+                elif epoch is not None:
+                    self.memoize["{}_{}".format(_BEST, _EPOCH)] = epoch+1
+                elif batch is not None:
+                    self.memoize["{}_{}".format(_BEST, _BATCH)] = batch+1
+        if custom_logs:
+            if isinstance(custom_logs, dict):
+                for k, v in custom_logs.items():
+                    if k not in ['loss', 'acc', 'accuracy', 'val_loss', 'val_acc', 'val_accuracy']:
+                        if 'custom_keys' not in self.metadata['annotations']:
+                            self.metadata['annotations']['custom_keys'] = []
+                        if k not in self.metadata['annotations']['custom_keys']:
+                            self.metadata['annotations']['custom_keys'].append(
+                                k)
+                        val[k] = v
+        for k, _ in val.items():
+            if k not in self.metadata['annotations']['keys']:
+                self.metadata['annotations']['keys'].append(k)
+        super().log(val)
+
+
+class CustomLogger(Logger):
+    pass
+
+
 class MlFlowRunNotFould(Exception):
     def __init__(self, m):
         self.message = m
