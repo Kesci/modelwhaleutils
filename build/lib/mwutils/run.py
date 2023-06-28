@@ -153,7 +153,7 @@ class Run():
         }
         if self.use_mlflow:
             _addr = remote_path + '/linkMLFlow'
-            _request_meta['use_mlfow'] = True
+            _request_meta['use_mlflow'] = True
             _request_meta['mlflow_run'] = self.mlflow_run
             create_run(_request_meta, _addr)
         else:
