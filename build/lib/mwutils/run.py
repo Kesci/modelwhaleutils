@@ -143,7 +143,7 @@ class Run():
         self.started = False
         # 创建一个 RUN
         _request_meta = {
-            'meatadata': {
+            'metadata': {
                 'name': name,
                 'user_id': self.user_id,
                 'run_id': self.run_id,
