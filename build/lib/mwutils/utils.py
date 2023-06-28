@@ -6,6 +6,7 @@ import warnings
 import json
 import atexit
 import jwt
+from .logs import *
 
 
 def create_run(payload, post_addr):
