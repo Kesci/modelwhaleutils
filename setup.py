@@ -4,7 +4,7 @@ setuptools.setup(
     name="modelwhaleutils",
     author="modalwhale team",
     description="use in mw",
-    url="https://github.com/Kesci/modelwhaleutils",
+    # url="https://github.com/Kesci/modelwhaleutils",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
