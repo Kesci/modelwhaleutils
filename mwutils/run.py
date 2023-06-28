@@ -151,7 +151,8 @@ class Run():
                  remote_path='', buffer_all_logs=False):
         if use_mlflow == True:
             active_run = mlflow.active_run()
-            print('TESTING', active_run)
+            if active_run is None:
+                raise Exception("没有找到已创建的 mlflow run")
         if name == '':
             name == '数据科学实验@' + str(randrange(999))
         if name in run_names:
