@@ -2,3 +2,4 @@ PyJWT
 requests
 pynvml
 psutil
+mlflow
