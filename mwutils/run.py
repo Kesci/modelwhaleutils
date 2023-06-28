@@ -16,6 +16,7 @@ import os
 from mwutils.sys_stat import SystemStats
 from mwutils.logs import Logger, mili_time
 import mwutils
+import mlflow
 
 
 _STEP = 'step'
@@ -145,9 +146,12 @@ def save_as_pb(sess, directory, filename, output_node):
 
 
 class Run():
-    def __init__(self, name="", user_id="", lab_id="", org_id="", user_token="", flush_interval_seconds=5,
+    def __init__(self, name="", user_id="", lab_id="", org_id="", user_token="", use_mlflow=True, flush_interval_seconds=5,
                  sys_stat_sample_size=1, sys_stat_sample_interval=2, local_path='', write_logs_to_local=False,
                  remote_path='', buffer_all_logs=False):
+        if use_mlflow == True:
+            active_run = mlflow.active_run()
+            print('TESTING', active_run)
         if name == '':
             name == '数据科学实验@' + str(randrange(999))
         if name in run_names:
@@ -454,7 +458,8 @@ class Run():
                                 torch.save(target.state_dict(), _save_path)
                                 pass
                         except:
-                            print('model cannot be saved, please check format')
+                            print('模型文件无法保存，请检查格式。')
+                            pass
 
                 path_artifact = '/api/dataset-upload-token?subType=artifact'
                 endpoint_get_token = self.remote_path.replace(
@@ -490,6 +495,7 @@ class Run():
                         except ClientError as e:
                             logging.error(e)
                             print('Error uploading file ', file)
+                            pass
         if self.remote_path:
             tp = int(time.time())
             json_struct = {
