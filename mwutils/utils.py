@@ -10,6 +10,7 @@ from .logs import *
 
 
 def create_run(payload, post_addr):
+    print("request address", post_addr)
     json_struct = {"metadata": payload['metadata']}
     if payload['use_mlflow'] == True:
         json_struct['mlflow_run_id'] = payload['mlflow_run'].info.run_uuid
