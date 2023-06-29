@@ -156,6 +156,7 @@ class Run():
         if is_debug == True:
             _addr = self.remote_path + '/linkMLFlow'
             _request_meta['use_mlflow'] = True
+            _request_meta['is_debug'] = True
             _request_meta['mlflow_run'] = {'info': {'run_uuid': debug_uid}}
             create_run(_request_meta, _addr)
         else:
