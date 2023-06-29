@@ -87,9 +87,7 @@ class SystemStats(object):
                     self.sampler[stat] = self.sampler.get(stat, [])
                     self.sampler[stat].append(value)
             self.samples += 1
-            print('sample ++')
             if self._shutdown or self.samples >= self.samples_to_average:
-                print('flush')
                 self.flush()
                 if self._shutdown:
                     break
@@ -101,7 +99,6 @@ class SystemStats(object):
                     break
 
     def shutdown(self):
-        print('SHUTDOWN')
         self._shutdown = True
         try:
             self._thread.join()
