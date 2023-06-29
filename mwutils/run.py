@@ -16,6 +16,8 @@ import os
 from mwutils.sys_stat import SystemStats
 from mwutils.logs import Logger, mili_time
 import mwutils
+import mlflow
+from .utils import *
 
 
 _STEP = 'step'
@@ -37,119 +39,24 @@ MODEL_TYPE_CUSTOM = "custom"
 run_names = {}
 
 
-class MLLoger(Logger):
-    def log(self, step=None, epoch=None, batch=None, loss=None, acc=None, custom_logs=None):
-        val = dict()
-        val[_TIMESTAMP] = int(time.time())
-        if step is not None:
-            val[_STEP] = step + 1
-        if epoch is not None:
-            val[_EPOCH] = epoch + 1
-        if batch is not None:
-            val[_BATCH] = batch + 1
-        if loss is not None:
-            val[_LOSS] = loss
-        if acc is not None:
-            val[_ACC] = acc
-
-        if acc:
-            if _MAX_ACC not in self.memoize and acc:
-                self.memoize[_MAX_ACC] = val
-            elif self.memoize[_MAX_ACC][_ACC] < val[_ACC]:
-                self.memoize[_MAX_ACC] = val
-
-        if loss:
-            best = False
-            if _MIN_LOSS not in self.memoize and loss:
-                self.memoize[_MIN_LOSS] = val
-                best = True
-            elif self.memoize[_MIN_LOSS][_LOSS] > val[_LOSS]:
-                self.memoize[_MIN_LOSS] = val
-                best = True
-            if best:
-                if step is not None:
-                    self.memoize["{}_{}".format(_BEST, _STEP)] = step+1
-                elif epoch is not None:
-                    self.memoize["{}_{}".format(_BEST, _EPOCH)] = epoch+1
-                elif batch is not None:
-                    self.memoize["{}_{}".format(_BEST, _BATCH)] = batch+1
-        if custom_logs:
-            if isinstance(custom_logs, dict):
-                for k, v in custom_logs.items():
-                    if k not in ['loss', 'acc', 'accuracy', 'val_loss', 'val_acc', 'val_accuracy']:
-                        if 'custom_keys' not in self.metadata['annotations']:
-                            self.metadata['annotations']['custom_keys'] = []
-                        if k not in self.metadata['annotations']['custom_keys']:
-                            self.metadata['annotations']['custom_keys'].append(
-                                k)
-                        val[k] = v
-        for k, _ in val.items():
-            if k not in self.metadata['annotations']['keys']:
-                self.metadata['annotations']['keys'].append(k)
-        super().log(val)
-
-
-def example_memoize_func(memoize_buf, val):
-    if "cost" in val:
-        if "min_cost" in memoize_buf and memoize_buf["min_cost"] > val["cost"]:
-            memoize_buf["min_cost"] = val["cost"]
-
-
-class CustomLogger(Logger):
-    pass
-
-
-def save_tf_ckpt(sess, directory, filename):
-    import tensorflow as tf
-    from tensorflow.python.framework import graph_util
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-    filepath = os.path.join(directory, filename + '.ckpt')
-    saver = tf.train.Saver()
-    saver.save(sess, filepath)
-    return filepath
-
-
-def save_as_pb(sess, directory, filename, output_node):
-    import tensorflow as tf
-    from tensorflow.python.tools import freeze_graph
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-
-    # Save check point for graph frozen later
-    ckpt_filepath = save_tf_ckpt(sess, directory=directory, filename=filename)
-    pbtxt_filename = filename + '.pbtxt'
-    pbtxt_filepath = os.path.join(directory, pbtxt_filename)
-    pb_filepath = os.path.join(directory, filename + '.pb')
-    # This will only save the graph but the variables will not be saved.
-    # You have to freeze your model first.
-    tf.train.write_graph(
-        graph_or_graph_def=sess.graph_def,
-        logdir=directory,
-        name=pbtxt_filename,
-        as_text=True)
-
-    freeze_graph.freeze_graph(
-        input_graph=pbtxt_filepath,
-        input_saver='',
-        input_binary=False,
-        input_checkpoint=ckpt_filepath,
-        output_node_names=output_node,
-        restore_op_name='save/restore_all',
-        filename_tensor_name='save/Const:0',
-        output_graph=pb_filepath,
-        clear_devices=True,
-        initializer_nodes='')
-
-    return pb_filepath
-
-
 class Run():
-    def __init__(self, name="", user_id="", lab_id="", org_id="", user_token="", flush_interval_seconds=5,
+    def __init__(self, name="", user_id="", lab_id="", org_id="", user_token="", use_mlflow=False, is_debug=False, debug_uid="", flush_interval_seconds=5,
                  sys_stat_sample_size=1, sys_stat_sample_interval=2, local_path='', write_logs_to_local=False,
                  remote_path='', buffer_all_logs=False):
+        if use_mlflow == True:
+            active_run = mlflow.active_run()
+            if active_run is None:
+                raise MlFlowRunNotFould("没有找到已创建的 mlflow run")
+            else:
+                self.use_mlflow = True
+                self.mlflow_run = active_run
+        else:
+            self.use_mlflow = False
         if name == '':
-            name == '数据科学实验@' + str(randrange(999))
+            if self.use_mlflow == True and self.mlflow_run is not None:
+                name = self.mlflow_run.info.run_name
+            else:
+                name = '数据科学实验@' + str(randrange(999))
         if name in run_names:
             s = "name {} is already used in current session.".format(name)
             raise Exception(s)
@@ -215,7 +122,7 @@ class Run():
         else:
             self.remote_path = 'https://www.heywhale.com/api/runs'
 
-        print('remotepath is', self.remote_path)
+        print('api 地址: ', self.remote_path)
         timestr = str(mili_time())
         if not (self.user_id and self.lab_id and self.org_id):
             s = "At least one of required fields is empty:\nuser_id: {}\norg_id: {}\nlab_id: {}\n".format(
@@ -227,19 +134,84 @@ class Run():
         self._sys_stat_sample_interval_seconds = sys_stat_sample_interval
         self.local_path = local_path
         self.write_logs_to_local = write_logs_to_local
-        self.logs_remote_path = remote_path + '/logs' if remote_path else ''
-        self.conclude_remote_path = remote_path + '/conclude'
-        self.abort_remote_path = remote_path + "/abort"
+        self.logs_remote_path = self.remote_path + '/logs'
+        self.conclude_remote_path = self.remote_path + '/conclude'
+        self.abort_remote_path = self.remote_path + "/abort"
         self.buffer_all_logs = buffer_all_logs
         self.model_path = ""
-        self.metadata = {"name": name, "user_id": user_id,
-                         "lab_id": lab_id, "run_id": self.run_id, "org_id": org_id, "annotations": {"custom_keys": [], "keys": []}}
+        self.metadata = {"name": name, "user_id": self.user_id,
+                         "lab_id": self.lab_id, "run_id": self.run_id, "org_id": self.org_id, "annotations": {"custom_keys": [], "keys": []}}
         self.pid = None
         self.started = False
 
+        # INIT ML
+        self.pid = getpid()
+        train_path = path.join(
+            self.local_path, "train.json") if self.write_logs_to_local else ''
+        test_path = path.join(
+            self.local_path, "test.json") if self.write_logs_to_local else ''
+        val_path = path.join(
+            self.local_path, "val.json") if self.write_logs_to_local else ''
+        sys_path = path.join(
+            self.local_path, "sys.json") if self.write_logs_to_local else ''
+        self._loggers['train'] = MLLoger("train", sample_time_interval_seconds=self.flush_interval_seconds,
+                                         metadata=self.metadata, local_path=train_path, post_addr=self.logs_remote_path,
+                                         buffer_all=self.buffer_all_logs)
+        self._loggers['test'] = MLLoger("test", sample_time_interval_seconds=self.flush_interval_seconds,
+                                        metadata=self.metadata, local_path=test_path, post_addr=self.logs_remote_path,
+                                        buffer_all=self.buffer_all_logs)
+        self._loggers['val'] = MLLoger("val", sample_time_interval_seconds=self.flush_interval_seconds,
+                                       metadata=self.metadata, local_path=val_path, post_addr=self.logs_remote_path,
+                                       buffer_all=self.buffer_all_logs)
+        self._loggers['system'] = CustomLogger("system", sample_time_interval_seconds=self.flush_interval_seconds,
+                                               metadata=self.metadata, local_path=sys_path, post_addr=self.logs_remote_path,
+                                               buffer_all=self.buffer_all_logs)
+        self._loggers['meta'] = CustomLogger("meta", sample_time_interval_seconds=self.flush_interval_seconds,
+                                             metadata=self.metadata, local_path=sys_path, post_addr=self.logs_remote_path,
+                                             buffer_all=self.buffer_all_logs)
+        print('logger class registered')
+        # START ML
+        self.started = True
+        self.__register_signal_handlers()
+        for _, logger in self._loggers.items():
+            logger.start()
+        for _, clogger in self.custom_loggers.items():
+            clogger.start()
+        self.sys_stat = SystemStats(self)
+        self.sys_stat.start()
+
+        print('logger started')
+        # 创建一个 RUN
+        _request_meta = {
+            'metadata': {
+                'name': name,
+                'user_id': self.user_id,
+                'run_id': self.run_id,
+                'lab_id': self.lab_id,
+                'org_id': self.org_id
+            }
+        }
+        if is_debug == True:
+            _addr = self.remote_path + '/linkMLFlow'
+            _request_meta['use_mlflow'] = True
+            _request_meta['is_debug'] = True
+            _request_meta['mlflow_run'] = {'info': {'run_uuid': debug_uid}}
+            create_run(_request_meta, _addr)
+        else:
+            if self.use_mlflow:
+                _request_meta['is_debug'] = False
+                _addr = self.remote_path + '/linkMLFlow'
+                _request_meta['use_mlflow'] = True
+                _request_meta['mlflow_run'] = self.mlflow_run
+                create_run(_request_meta, _addr)
+            else:
+                _request_meta['use_mlflow'] = False
+                _request_meta['is_debug'] = False
+                create_run(_request_meta, self.logs_remote_path)
+
     def init_ml(self):
-        if self.pid:
-            return
+        # if self.pid:
+        #     return
         self.pid = getpid()
         train_path = path.join(
             self.local_path, "train.json") if self.write_logs_to_local else ''
@@ -454,7 +426,8 @@ class Run():
                                 torch.save(target.state_dict(), _save_path)
                                 pass
                         except:
-                            print('model cannot be saved, please check format')
+                            print('模型文件无法保存，请检查格式。')
+                            pass
 
                 path_artifact = '/api/dataset-upload-token?subType=artifact'
                 endpoint_get_token = self.remote_path.replace(
@@ -490,6 +463,7 @@ class Run():
                         except ClientError as e:
                             logging.error(e)
                             print('Error uploading file ', file)
+                            pass
         if self.remote_path:
             tp = int(time.time())
             json_struct = {
@@ -518,39 +492,8 @@ class Run():
                     break
         # if upload_model:
         #     self.__upload_model()
+        if self.use_mlflow:
+            mlflow.end_run()
         self.started = False
         self.run_id = "concluded"
-
-
-if __name__ == "__main__":
-    import time
-
-    def sys_memoize_func_maxcpu(memoize_buf, val):
-        if "cpu" in val:
-            if "max_cpu" in memoize_buf and memoize_buf["max_cpu"] < val["cpu"]:
-                memoize_buf["max_cpu"] = val["cpu"]
-            if "max_cpu" not in memoize_buf:
-                memoize_buf["max_cpu"] = val["cpu"]
-
-    def sys_memoize_func_mincpu(memoize_buf, val):
-        if "cpu" in val:
-            if "min_cpu" in memoize_buf and memoize_buf["min_cpu"] > val["cpu"]:
-                memoize_buf["min_cpu"] = val["cpu"]
-            if "min_cpu" not in memoize_buf:
-                memoize_buf["min_cpu"] = val["cpu"]
-
-    r = Run("test88", "testuser123", "proj123", "job123", flush_interval_seconds=5,
-            local_path="/Users/mk/heyw/github/mwutils/mwutils", sys_stat_sample_interval=5, sys_stat_sample_size=21, buffer_all_logs=True)
-    r.init_ml()
-    r.add_memoize_funcs_to_logger(
-        "system", [sys_memoize_func_maxcpu, sys_memoize_func_mincpu])
-
-    r.start_ml()
-
-    for i in range(150):
-        r.log_ml(step=i, acc=i*(1/150), loss=149-i)
-        time.sleep(0.2)
-    for i in range(20):
-        r.log_ml(epoch=i, acc=i*(1/40)+0.5, loss=1, phase='test')
-        time.sleep(0.2)
-    r.conclude()
+        print('记录已结束')

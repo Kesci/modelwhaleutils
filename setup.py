@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="modelwhaleutils",
-    version="0.5.1.4",
+    version="0.5.1.5",
     author="modalwhale team",
     description="use in mw",
     url="https://github.com/Kesci/modelwhaleutils",
@@ -12,6 +12,7 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    install_requires=["PyJWT", "requests", "pynvml", "psutil", "boto3"],
+    install_requires=["PyJWT", "requests",
+                      "pynvml", "psutil", "boto3", "mlflow"],
     python_requires='>=3.6',
 )

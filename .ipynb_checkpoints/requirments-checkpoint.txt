@@ -1,4 +1,0 @@
-PyJWT
-requests
-pynvml
-psutil
