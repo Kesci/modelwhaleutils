@@ -143,6 +143,7 @@ class Run():
                          "lab_id": self.lab_id, "run_id": self.run_id, "org_id": self.org_id, "annotations": {"custom_keys": [], "keys": []}}
         self.pid = None
         self.started = False
+
         # INIT ML
         self.pid = getpid()
         train_path = path.join(
@@ -168,6 +169,7 @@ class Run():
         self._loggers['meta'] = CustomLogger("meta", sample_time_interval_seconds=self.flush_interval_seconds,
                                              metadata=self.metadata, local_path=sys_path, post_addr=self.logs_remote_path,
                                              buffer_all=self.buffer_all_logs)
+
         # START ML
         self.started = True
         self.__register_signal_handlers()
