@@ -134,9 +134,9 @@ class Run():
         self._sys_stat_sample_interval_seconds = sys_stat_sample_interval
         self.local_path = local_path
         self.write_logs_to_local = write_logs_to_local
-        self.logs_remote_path = remote_path + '/logs' if remote_path else ''
-        self.conclude_remote_path = remote_path + '/conclude'
-        self.abort_remote_path = remote_path + "/abort"
+        self.logs_remote_path = self.remote_path + '/logs' if remote_path else ''
+        self.conclude_remote_path = self.remote_path + '/conclude'
+        self.abort_remote_path = self.remote_path + "/abort"
         self.buffer_all_logs = buffer_all_logs
         self.model_path = ""
         self.metadata = {"name": name, "user_id": user_id,
