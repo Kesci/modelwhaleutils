@@ -169,7 +169,7 @@ class Run():
         self._loggers['meta'] = CustomLogger("meta", sample_time_interval_seconds=self.flush_interval_seconds,
                                              metadata=self.metadata, local_path=sys_path, post_addr=self.logs_remote_path,
                                              buffer_all=self.buffer_all_logs)
-
+        print('logger class registered')
         # START ML
         self.started = True
         self.__register_signal_handlers()
@@ -180,6 +180,7 @@ class Run():
         self.sys_stat = SystemStats(self)
         self.sys_stat.start()
 
+        print('logger started')
         # 创建一个 RUN
         _request_meta = {
             'metadata': {
