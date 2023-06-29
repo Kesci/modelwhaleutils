@@ -167,6 +167,7 @@ class Run():
                 _request_meta['mlflow_run'] = self.mlflow_run
                 create_run(_request_meta, _addr)
             else:
+                _request_meta['use_mlflow'] = False
                 _request_meta['is_debug'] = False
                 create_run(_request_meta, self.logs_remote_path)
 
