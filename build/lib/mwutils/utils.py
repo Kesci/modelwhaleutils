@@ -18,7 +18,7 @@ def create_run(payload, post_addr):
         if payload['use_mlflow'] == True:
             json_struct['mlflow_run_id'] = payload['mlflow_run'].info.run_uuid
         else:
-            payload['init'] == True
+            json_struct['init'] == True
     for _ in range(3):
         r = requests.post(post_addr, json=json_struct, headers={"Authorization": jwt.encode(
             {"whatever": "1"}, "857851b2-c28c-4d94-83c8-f607b50ccd03")})
