@@ -453,5 +453,8 @@ class Run():
                     break
         # if upload_model:
         #     self.__upload_model()
+        if self.use_mlflow:
+            mlflow.end_run()
         self.started = False
         self.run_id = "concluded"
+        print('记录已结束')
