@@ -50,6 +50,8 @@ class Run():
             else:
                 self.use_mlflow = True
                 self.mlflow_run = active_run
+        else:
+            self.use_mlflow = False
         if name == '':
             if self.use_mlflow == True and self.mlflow_run is not None:
                 name = self.mlflow_run.info.run_name
