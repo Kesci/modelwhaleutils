@@ -40,7 +40,7 @@ run_names = {}
 
 
 class Run():
-    def __init__(self, name="", user_id="", lab_id="", org_id="", user_token="", use_mlflow=True, flush_interval_seconds=5,
+    def __init__(self, name="", user_id="", lab_id="", org_id="", user_token="", use_mlflow=True, is_debug=False, debug_uid="", flush_interval_seconds=5,
                  sys_stat_sample_size=1, sys_stat_sample_interval=2, local_path='', write_logs_to_local=False,
                  remote_path='', buffer_all_logs=False):
         if use_mlflow == True:
@@ -151,13 +151,19 @@ class Run():
                 'org_id': self.org_id
             }
         }
-        if self.use_mlflow:
+        if is_debug == True:
             _addr = self.remote_path + '/linkMLFlow'
             _request_meta['use_mlflow'] = True
-            _request_meta['mlflow_run'] = self.mlflow_run
+            _request_meta['mlflow_run'] = {'info': {'run_uuid': debug_uid}}
             create_run(_request_meta, _addr)
         else:
-            create_run(_request_meta, self.logs_remote_path)
+            if self.use_mlflow:
+                _addr = self.remote_path + '/linkMLFlow'
+                _request_meta['use_mlflow'] = True
+                _request_meta['mlflow_run'] = self.mlflow_run
+                create_run(_request_meta, _addr)
+            else:
+                create_run(_request_meta, self.logs_remote_path)
 
     def init_ml(self):
         if self.pid:
