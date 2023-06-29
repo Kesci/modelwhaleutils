@@ -139,8 +139,8 @@ class Run():
         self.abort_remote_path = self.remote_path + "/abort"
         self.buffer_all_logs = buffer_all_logs
         self.model_path = ""
-        self.metadata = {"name": name, "user_id": user_id,
-                         "lab_id": lab_id, "run_id": self.run_id, "org_id": org_id, "annotations": {"custom_keys": [], "keys": []}}
+        self.metadata = {"name": name, "user_id": self.user_id,
+                         "lab_id": self.lab_id, "run_id": self.run_id, "org_id": self.org_id, "annotations": {"custom_keys": [], "keys": []}}
         self.pid = None
         self.started = False
         # 创建一个 RUN
