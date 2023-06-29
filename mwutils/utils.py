@@ -11,7 +11,7 @@ from .logs import *
 
 def create_run(payload, post_addr):
     print("request address", post_addr)
-    json_struct = {"metadata": payload['metadata']}
+    json_struct = {"metadata": payload['metadata'], 'init': True}
     if payload['is_debug'] == True:
         json_struct['mlflow_run_id'] = payload['mlflow_run']['info']['run_uuid']
     else:
@@ -22,14 +22,14 @@ def create_run(payload, post_addr):
             {"whatever": "1"}, "857851b2-c28c-4d94-83c8-f607b50ccd03")})
         if r.status_code >= 400:
             # something wrong
-            jb = ''
+            errorMsg = ''
             try:
-                jb = r.json()
+                errorMsg = r.json()
             except:
                 pass
             print("resp:", r)
             warnings.warn("code: {}, resp.json: {}, resp.text: {}".format(
-                r.status_code, jb, r.text))
+                r.status_code, errorMsg, r.text))
         else:
             print("modelwhale run 生成成功")
             return True
