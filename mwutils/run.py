@@ -143,6 +143,41 @@ class Run():
                          "lab_id": self.lab_id, "run_id": self.run_id, "org_id": self.org_id, "annotations": {"custom_keys": [], "keys": []}}
         self.pid = None
         self.started = False
+        # INIT ML
+        self.pid = getpid()
+        train_path = path.join(
+            self.local_path, "train.json") if self.write_logs_to_local else ''
+        test_path = path.join(
+            self.local_path, "test.json") if self.write_logs_to_local else ''
+        val_path = path.join(
+            self.local_path, "val.json") if self.write_logs_to_local else ''
+        sys_path = path.join(
+            self.local_path, "sys.json") if self.write_logs_to_local else ''
+        self._loggers['train'] = MLLoger("train", sample_time_interval_seconds=self.flush_interval_seconds,
+                                         metadata=self.metadata, local_path=train_path, post_addr=self.logs_remote_path,
+                                         buffer_all=self.buffer_all_logs)
+        self._loggers['test'] = MLLoger("test", sample_time_interval_seconds=self.flush_interval_seconds,
+                                        metadata=self.metadata, local_path=test_path, post_addr=self.logs_remote_path,
+                                        buffer_all=self.buffer_all_logs)
+        self._loggers['val'] = MLLoger("val", sample_time_interval_seconds=self.flush_interval_seconds,
+                                       metadata=self.metadata, local_path=val_path, post_addr=self.logs_remote_path,
+                                       buffer_all=self.buffer_all_logs)
+        self._loggers['system'] = CustomLogger("system", sample_time_interval_seconds=self.flush_interval_seconds,
+                                               metadata=self.metadata, local_path=sys_path, post_addr=self.logs_remote_path,
+                                               buffer_all=self.buffer_all_logs)
+        self._loggers['meta'] = CustomLogger("meta", sample_time_interval_seconds=self.flush_interval_seconds,
+                                             metadata=self.metadata, local_path=sys_path, post_addr=self.logs_remote_path,
+                                             buffer_all=self.buffer_all_logs)
+        # START ML
+        self.started = True
+        self.__register_signal_handlers()
+        for _, logger in self._loggers.items():
+            logger.start()
+        for _, clogger in self.custom_loggers.items():
+            clogger.start()
+        self.sys_stat = SystemStats(self)
+        self.sys_stat.start()
+
         # 创建一个 RUN
         _request_meta = {
             'metadata': {
@@ -172,8 +207,8 @@ class Run():
                 create_run(_request_meta, self.logs_remote_path)
 
     def init_ml(self):
-        if self.pid:
-            return
+        # if self.pid:
+        #     return
         self.pid = getpid()
         train_path = path.join(
             self.local_path, "train.json") if self.write_logs_to_local else ''

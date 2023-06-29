@@ -3,14 +3,14 @@ import os
 
 
 LOGS_VAL = "val_"
-    
+
 
 class MWCustomCallback(keras.callbacks.Callback):
     def set_run(self, run):
         self.run = run
         self.test_epoch = 0
-        run.init_ml()
-        run.start_ml()
+        # run.init_ml()
+        # run.start_ml()
 
     def conclude_run(self):
         self.run.conclude()
@@ -22,7 +22,7 @@ class MWCustomCallback(keras.callbacks.Callback):
         loss = logs.get('loss')
         acc = logs.get('acc')
         acc = acc if acc else logs.get('accuracy')
-        
+
         self._log_val_if_exists(epoch, logs=logs)
         self.run.log_ml(epoch=epoch, loss=loss,
                         acc=acc, phase="train", custom_logs=logs)
