@@ -41,7 +41,7 @@ def create_run(payload, post_addr):
 class MLLoger(Logger):
     def log(self, step=None, epoch=None, batch=None, loss=None, acc=None, custom_logs=None):
         val = dict()
-        val[_TIMESTAMP] = int(time.time())
+        val['_TIMESTAMP'] = int(time.time())
         if step is not None:
             val[_STEP] = step + 1
         if epoch is not None:
