@@ -40,7 +40,7 @@ run_names = {}
 
 
 class Run():
-    def __init__(self, name="", user_id="", lab_id="", org_id="", user_token="", use_mlflow=True, is_debug=False, debug_uid="", flush_interval_seconds=5,
+    def __init__(self, name="", user_id="", lab_id="", org_id="", user_token="", use_mlflow=False, is_debug=False, debug_uid="", flush_interval_seconds=5,
                  sys_stat_sample_size=1, sys_stat_sample_interval=2, local_path='', write_logs_to_local=False,
                  remote_path='', buffer_all_logs=False):
         if use_mlflow == True:
