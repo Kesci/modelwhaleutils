@@ -87,7 +87,9 @@ class SystemStats(object):
                     self.sampler[stat] = self.sampler.get(stat, [])
                     self.sampler[stat].append(value)
             self.samples += 1
+            print('sample ++')
             if self._shutdown or self.samples >= self.samples_to_average:
+                print('flush')
                 self.flush()
                 if self._shutdown:
                     break
@@ -168,7 +170,7 @@ class SystemStats(object):
             except pynvml.NVMLError as err:
                 pass
         if psutil:
-            #net = psutil.net_io_counters()
+            # net = psutil.net_io_counters()
             sysmem = psutil.virtual_memory()
             stats["cpu"] = psutil.cpu_percent()
             stats["memory"] = sysmem.percent
