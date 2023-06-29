@@ -161,11 +161,13 @@ class Run():
             create_run(_request_meta, _addr)
         else:
             if self.use_mlflow:
+                _request_meta['is_debug'] = False
                 _addr = self.remote_path + '/linkMLFlow'
                 _request_meta['use_mlflow'] = True
                 _request_meta['mlflow_run'] = self.mlflow_run
                 create_run(_request_meta, _addr)
             else:
+                _request_meta['is_debug'] = False
                 create_run(_request_meta, self.logs_remote_path)
 
     def init_ml(self):
