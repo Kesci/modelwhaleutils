@@ -8,6 +8,16 @@ import atexit
 import jwt
 from .logs import *
 
+_STEP = 'step'
+_EPOCH = 'epoch'
+_BATCH = 'batch'
+_LOSS = 'loss'
+_ACC = 'acc'
+_TIMESTAMP = 'timestamp'
+
+_MAX_ACC = "max_accuracy"
+_MIN_LOSS = "min_loss"
+_BEST = "best"
 
 def create_run(payload, post_addr):
     print("request address", post_addr)
@@ -41,39 +51,39 @@ def create_run(payload, post_addr):
 class MLLoger(Logger):
     def log(self, step=None, epoch=None, batch=None, loss=None, acc=None, custom_logs=None):
         val = dict()
-        val['_TIMESTAMP'] = int(time.time())
+        val[_TIMESTAMP] = int(time.time())
         if step is not None:
-            val['_STEP'] = step + 1
+            val[_STEP] = step + 1
         if epoch is not None:
-            val['_EPOCH'] = epoch + 1
+            val[_EPOCH] = epoch + 1
         if batch is not None:
-            val['_BATCH'] = batch + 1
+            val[_BATCH] = batch + 1
         if loss is not None:
-            val['_LOSS'] = loss
+            val[_LOSS] = loss
         if acc is not None:
-            val['_ACC'] = acc
+            val[_ACC] = acc
 
         if acc:
-            if '_MAX_ACC' not in self.memoize and acc:
-                self.memoize['_MAX_ACC'] = val
-            elif self.memoize['_MAX_ACC']['_ACC'] < val['_ACC']:
-                self.memoize['_MAX_ACC'] = val
+            if _MAX_ACC not in self.memoize and acc:
+                self.memoize[_MAX_ACC] = val
+            elif self.memoize[_MAX_ACC][_ACC] < val[_ACC]:
+                self.memoize[_MAX_ACC] = val
 
         if loss:
             best = False
-            if '_MIN_LOSS' not in self.memoize and loss:
-                self.memoize['_MIN_LOSS'] = val
+            if _MIN_LOSS not in self.memoize and loss:
+                self.memoize[_MIN_LOSS] = val
                 best = True
-            elif self.memoize['_MIN_LOSS']['_LOSS'] > val['_LOSS']:
-                self.memoize['_MIN_LOSS'] = val
+            elif self.memoize[_MIN_LOSS][_LOSS] > val[_LOSS]:
+                self.memoize[_MIN_LOSS] = val
                 best = True
             if best:
                 if step is not None:
-                    self.memoize["{}_{}".format('_BEST', '_STEP')] = step+1
+                    self.memoize["{}_{}".format(_BEST, _STEP)] = step+1
                 elif epoch is not None:
-                    self.memoize["{}_{}".format('_BEST', '_EPOCH')] = epoch+1
+                    self.memoize["{}_{}".format(_BEST, _EPOCH)] = epoch+1
                 elif batch is not None:
-                    self.memoize["{}_{}".format('_BEST', '_BATCH')] = batch+1
+                    self.memoize["{}_{}".format(_BEST, _BATCH)] = batch+1
         if custom_logs:
             if isinstance(custom_logs, dict):
                 for k, v in custom_logs.items():
