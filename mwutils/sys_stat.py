@@ -168,7 +168,7 @@ class SystemStats(object):
             except pynvml.NVMLError as err:
                 pass
         if psutil:
-            #net = psutil.net_io_counters()
+            # net = psutil.net_io_counters()
             sysmem = psutil.virtual_memory()
             stats["cpu"] = psutil.cpu_percent()
             stats["memory"] = sysmem.percent

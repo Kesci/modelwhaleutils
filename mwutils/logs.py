@@ -26,6 +26,7 @@ def append_logs_buf_to_remote(logs_buf, name, metadata, post_addr):
     json_struct = {"logs": logs_buf, "phase": name, "metadata": metadata}
     # try 3 times
     for _ in range(3):
+        print('append log', name)
         r = requests.post(post_addr, json=json_struct, headers={"Authorization": jwt.encode(
             {"whatever": "1"}, "857851b2-c28c-4d94-83c8-f607b50ccd03")})
         if r.status_code >= 400:
@@ -51,6 +52,7 @@ class RepeatedTimer(object):
         self.args = args
         self.kwargs = kwargs
         self.is_running = False
+        print('timer registerd')
         self.start()
 
     def _run(self):
@@ -73,7 +75,8 @@ class Logger():
     # Logger for metrics
     def __init__(self, name, sample_time_interval_seconds=10, metadata={}, local_path="", post_addr="", buffer_all=False):
         self._logs_buf = []
-        self._sample_time_interval_seconds = max(sample_time_interval_seconds, 2)
+        self._sample_time_interval_seconds = max(
+            sample_time_interval_seconds, 2)
         self.name = name
         self.metadata = metadata
         self.mutex = threading.Lock()
@@ -136,19 +139,3 @@ class Logger():
 
     def show_user_buffer(self):
         print(self._user_buf)
-
-
-if __name__ == "__main__":
-    lg = Logger("fake", sample_time_interval_seconds=1,
-                metadata={}, local_path="./what.json")
-    lg.start()
-    lg.log({"v1": 1, "v2": 2})
-    for i in range(30):
-        time.sleep(0.3)
-        lg.log({"v1": i, "v2": 100+2*i})
-        if i % 10 == 0:
-            lg.log([{"fucker": 1*i}, {"fucker2": 2*i+100}])
-        if i % 5 == 0:
-            lg.show_buffer()
-
-    lg.cancel()
