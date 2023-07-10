@@ -466,7 +466,6 @@ class Run():
                 region = oss_config['region']
                 Session = oss_config['sessionToken']
                 bucket = oss_config['bucket']
-
                 epoch_time = int(time.time())
 
                 s3_client = boto3.client('s3',
@@ -475,6 +474,14 @@ class Run():
                                          aws_secret_access_key=SK,
                                          aws_session_token=Session
                                          )
+                if oss_config["host"] != "":
+                    s3_client = boto3.client('s3',
+                                             endpoint_url=oss_config["host"],
+                                             region_name=region,
+                                             aws_access_key_id=AK,
+                                             aws_secret_access_key=SK,
+                                             aws_session_token=Session
+                                             )
 
                 upload_dir = _path
                 for subdir, dirs, files in os.walk(upload_dir):
