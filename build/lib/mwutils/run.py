@@ -122,7 +122,7 @@ class Run():
         else:
             self.remote_path = 'https://www.heywhale.com/api/runs'
 
-        print('api 地址: ', self.remote_path)
+        print('API 地址: ', self.remote_path)
         timestr = str(mili_time())
         if not (self.user_id and self.lab_id and self.org_id):
             s = "At least one of required fields is empty:\nuser_id: {}\norg_id: {}\nlab_id: {}\n".format(
@@ -169,7 +169,6 @@ class Run():
         self._loggers['meta'] = CustomLogger("meta", sample_time_interval_seconds=self.flush_interval_seconds,
                                              metadata=self.metadata, local_path=sys_path, post_addr=self.logs_remote_path,
                                              buffer_all=self.buffer_all_logs)
-        print('logger class registered')
         # START ML
         self.started = True
         self.__register_signal_handlers()
@@ -180,7 +179,6 @@ class Run():
         self.sys_stat = SystemStats(self)
         self.sys_stat.start()
 
-        print('logger started')
         # 创建一个 RUN
         _request_meta = {
             'metadata': {
@@ -355,7 +353,6 @@ class Run():
                         jb = r.json()
                     except:
                         pass
-                    print("resp:", r)
                     msg = "code: {}, resp.json: {}, resp.text: {}".format(
                         r.status_code, jb, r.text)
                     print(msg)
@@ -489,7 +486,6 @@ class Run():
                         jb = r.json()
                     except:
                         pass
-                    print("resp:", r)
                     msg = "code: {}, resp.json: {}, resp.text: {}".format(
                         r.status_code, jb, r.text)
                     print(msg)

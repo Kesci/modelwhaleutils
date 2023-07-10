@@ -26,7 +26,6 @@ def append_logs_buf_to_remote(logs_buf, name, metadata, post_addr):
     json_struct = {"logs": logs_buf, "phase": name, "metadata": metadata}
     # try 3 times
     for _ in range(3):
-        print('append log', name)
         r = requests.post(post_addr, json=json_struct, headers={"Authorization": jwt.encode(
             {"whatever": "1"}, "857851b2-c28c-4d94-83c8-f607b50ccd03")})
         if r.status_code >= 400:
@@ -36,7 +35,6 @@ def append_logs_buf_to_remote(logs_buf, name, metadata, post_addr):
                 jb = r.json()
             except:
                 pass
-            print("resp:", r)
             warnings.warn("code: {}, resp.json: {}, resp.text: {}".format(
                 r.status_code, jb, r.text))
         else:
@@ -52,7 +50,6 @@ class RepeatedTimer(object):
         self.args = args
         self.kwargs = kwargs
         self.is_running = False
-        print('timer registerd')
         self.start()
 
     def _run(self):
