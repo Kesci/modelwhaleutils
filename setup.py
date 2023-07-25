@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="modelwhaleutils",
-    version="0.5.2.1",
+    version="0.5.2.2",
     author="modalwhale team",
     description="use in mw",
     url="https://github.com/Kesci/modelwhaleutils",
