@@ -3,4 +3,4 @@ requests
 pynvml
 psutil
 boto3
-mlflow
+mlflow==2.2.0
