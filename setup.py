@@ -13,6 +13,6 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     install_requires=["PyJWT", "requests",
-                      "pynvml", "psutil", "boto3", "mlflow==2.2.0"],
+                      "pynvml", "psutil", "boto3", "mlflow"],
     python_requires='>=3.6',
 )
