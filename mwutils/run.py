@@ -449,7 +449,7 @@ class Run():
                                          )
                 if oss_config["host"] != "":
                     s3_client = boto3.client('s3',
-                                             endpoint_url=oss_config["host"],
+                                             endpoint_url=oss_config["host"] if oss_config["host"].startswith('http://') or oss_config["host"].startswith('https://') else 'https://' + oss_config["host"],
                                              region_name=region,
                                              aws_access_key_id=AK,
                                              aws_secret_access_key=SK,
