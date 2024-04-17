@@ -107,10 +107,10 @@ class Run():
 
         # self.user_token = user_token
         if config_token:
-            print('using config_token')
+            # print('using config_token')
             self.user_token = config_token
         elif env_token:
-            print('using env_token')
+            # print('using env_token')
             self.user_token = env_token
         else:
             self.user_token = user_token
@@ -122,7 +122,7 @@ class Run():
         else:
             self.remote_path = 'https://www.heywhale.com/api/runs'
 
-        print('api 地址: ', self.remote_path)
+        # print('api 地址: ', self.remote_path)
         timestr = str(mili_time())
         if not (self.user_id and self.lab_id and self.org_id):
             s = "At least one of required fields is empty:\nuser_id: {}\norg_id: {}\nlab_id: {}\n".format(
@@ -169,7 +169,7 @@ class Run():
         self._loggers['meta'] = CustomLogger("meta", sample_time_interval_seconds=self.flush_interval_seconds,
                                              metadata=self.metadata, local_path=sys_path, post_addr=self.logs_remote_path,
                                              buffer_all=self.buffer_all_logs)
-        print('logger class registered')
+        #print('logger class registered')
         # START ML
         self.started = True
         self.__register_signal_handlers()
@@ -180,7 +180,7 @@ class Run():
         self.sys_stat = SystemStats(self)
         self.sys_stat.start()
 
-        print('logger started')
+        # print('logger started')
         # 创建一个 RUN
         _request_meta = {
             'metadata': {
@@ -210,32 +210,37 @@ class Run():
                 create_run(_request_meta, self.logs_remote_path)
 
     def init_ml(self):
+        pass
+        # 这个函数在 run.__init__ 已经执行
+        # 实际上这个函数可以不掉用，为了兼容以前的代码
+        # 保持为空
+        # print("pid ", self.pid)
         # if self.pid:
         #     return
-        self.pid = getpid()
-        train_path = path.join(
-            self.local_path, "train.json") if self.write_logs_to_local else ''
-        test_path = path.join(
-            self.local_path, "test.json") if self.write_logs_to_local else ''
-        val_path = path.join(
-            self.local_path, "val.json") if self.write_logs_to_local else ''
-        sys_path = path.join(
-            self.local_path, "sys.json") if self.write_logs_to_local else ''
-        self._loggers['train'] = MLLoger("train", sample_time_interval_seconds=self.flush_interval_seconds,
-                                         metadata=self.metadata, local_path=train_path, post_addr=self.logs_remote_path,
-                                         buffer_all=self.buffer_all_logs)
-        self._loggers['test'] = MLLoger("test", sample_time_interval_seconds=self.flush_interval_seconds,
-                                        metadata=self.metadata, local_path=test_path, post_addr=self.logs_remote_path,
-                                        buffer_all=self.buffer_all_logs)
-        self._loggers['val'] = MLLoger("val", sample_time_interval_seconds=self.flush_interval_seconds,
-                                       metadata=self.metadata, local_path=val_path, post_addr=self.logs_remote_path,
-                                       buffer_all=self.buffer_all_logs)
-        self._loggers['system'] = CustomLogger("system", sample_time_interval_seconds=self.flush_interval_seconds,
-                                               metadata=self.metadata, local_path=sys_path, post_addr=self.logs_remote_path,
-                                               buffer_all=self.buffer_all_logs)
-        self._loggers['meta'] = CustomLogger("meta", sample_time_interval_seconds=self.flush_interval_seconds,
-                                             metadata=self.metadata, local_path=sys_path, post_addr=self.logs_remote_path,
-                                             buffer_all=self.buffer_all_logs)
+        # self.pid = getpid()
+        # train_path = path.join(
+        #     self.local_path, "train.json") if self.write_logs_to_local else ''
+        # test_path = path.join(
+        #     self.local_path, "test.json") if self.write_logs_to_local else ''
+        # val_path = path.join(
+        #     self.local_path, "val.json") if self.write_logs_to_local else ''
+        # sys_path = path.join(
+        #     self.local_path, "sys.json") if self.write_logs_to_local else ''
+        # self._loggers['train'] = MLLoger("train", sample_time_interval_seconds=self.flush_interval_seconds,
+        #                                  metadata=self.metadata, local_path=train_path, post_addr=self.logs_remote_path,
+        #                                  buffer_all=self.buffer_all_logs)
+        # self._loggers['test'] = MLLoger("test", sample_time_interval_seconds=self.flush_interval_seconds,
+        #                                 metadata=self.metadata, local_path=test_path, post_addr=self.logs_remote_path,
+        #                                 buffer_all=self.buffer_all_logs)
+        # self._loggers['val'] = MLLoger("val", sample_time_interval_seconds=self.flush_interval_seconds,
+        #                                metadata=self.metadata, local_path=val_path, post_addr=self.logs_remote_path,
+        #                                buffer_all=self.buffer_all_logs)
+        # self._loggers['system'] = CustomLogger("system", sample_time_interval_seconds=self.flush_interval_seconds,
+        #                                        metadata=self.metadata, local_path=sys_path, post_addr=self.logs_remote_path,
+        #                                        buffer_all=self.buffer_all_logs)
+        # self._loggers['meta'] = CustomLogger("meta", sample_time_interval_seconds=self.flush_interval_seconds,
+        #                                      metadata=self.metadata, local_path=sys_path, post_addr=self.logs_remote_path,
+        #                                      buffer_all=self.buffer_all_logs)
 
     def start_ml(self):
         if self.started:
@@ -341,6 +346,8 @@ class Run():
         raise KeyboardInterrupt("termniated by user")
 
     def __abort_run(self, sig, reason):
+        if not self.started:
+            return
         if self.remote_path:
             tp = int(time.time())
             json_struct = {"metadata": self.metadata,
@@ -355,13 +362,13 @@ class Run():
                         jb = r.json()
                     except:
                         pass
-                    print("resp:", r)
+                    #print("resp:", r)
                     msg = "code: {}, resp.json: {}, resp.text: {}".format(
                         r.status_code, jb, r.text)
-                    print(msg)
+                    #print(msg)
                     warnings.warn(msg)
                 else:
-                    print("abort remote call succeed. resp:", r)
+                    #print("abort remote call succeed. resp:", r)
                     break
         self.started = False
         self.run_id = "aborted"
@@ -369,6 +376,7 @@ class Run():
     def conclude(self, show_memoize=True, save_model=False, model_path="./saved_model", target=None, output_node=None, use_jit=False):
         if not self.started:
             pass
+        self.sys_stat.shutdown()
         for _, logger in self._loggers.items():
             logger.cancel()
             if show_memoize and logger.memoize:
@@ -489,13 +497,13 @@ class Run():
                         jb = r.json()
                     except:
                         pass
-                    print("resp:", r)
+                    #print("resp:", r)
                     msg = "code: {}, resp.json: {}, resp.text: {}".format(
                         r.status_code, jb, r.text)
-                    print(msg)
+                    #print(msg)
                     warnings.warn(msg)
                 else:
-                    print("conclude remote call succeed. resp:", r)
+                    # print("conclude remote call succeed. resp:", r)
                     break
         # if upload_model:
         #     self.__upload_model()
@@ -503,4 +511,3 @@ class Run():
             mlflow.end_run()
         self.started = False
         self.run_id = "concluded"
-        print('记录已结束')
