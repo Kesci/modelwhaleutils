@@ -1,4 +1,7 @@
 ./test.ipynb
 .VSCodeCounter/
+test.py
 ./dist
 /dist/*
+__pycache__
+modelwhaleutils.egg-info

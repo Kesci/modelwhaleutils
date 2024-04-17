@@ -1,0 +1,23 @@
+[project]
+name = "modelwhaleutils"
+version = "0.5.2.3"
+authors = [
+  { name="ModelWHale Team"},
+]
+description = "Used in modelwhale"
+readme = "README.md"
+requires-python = ">=3.6"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = ['PyJWT', 'requests', 'pynvml', 'psutil', 'boto3', 'mlflow']
+
+[project.urls]
+Homepage = "https://github.com/Kesci/modelwhaleutils"
+Issues = "https://github.com/Kesci/modelwhaleutils/issues"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"

@@ -60,7 +60,7 @@ class SystemStats(object):
             print(
                 "psutil not installed, only GPU stats will be reported.  Install with pip install psutil")
         self._thread = threading.Thread(target=self._thread_body)
-        self._thread.daemon = True
+        # self._thread.daemon = True
 
     def start(self):
         self._thread.start()

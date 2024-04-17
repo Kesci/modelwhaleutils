@@ -20,7 +20,7 @@ _MIN_LOSS = "min_loss"
 _BEST = "best"
 
 def create_run(payload, post_addr):
-    print("request address", post_addr)
+    # print("request address", post_addr)
     json_struct = {"metadata": payload['metadata']}
     if payload['is_debug'] == True:
         json_struct['mlflow_run_id'] = payload['mlflow_run']['info']['run_uuid']
@@ -39,11 +39,11 @@ def create_run(payload, post_addr):
                 errorMsg = r.json()
             except:
                 pass
-            print("resp:", r)
-            warnings.warn("code: {}, resp.json: {}, resp.text: {}".format(
-                r.status_code, errorMsg, r.text))
+            # print("resp:", r)
+            # warnings.warn("code: {}, resp.json: {}, resp.text: {}".format(
+            #     r.status_code, errorMsg, r.text))
         else:
-            print("modelwhale run 生成成功")
+            # print("modelwhale run 生成成功")
             return True
     return False
 
