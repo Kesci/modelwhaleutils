@@ -1,6 +1,6 @@
 [project]
 name = "modelwhaleutils"
-version = "0.5.2.3"
+version = "0.5.2.6"
 authors = [
   { name="ModelWHale Team"},
 ]
